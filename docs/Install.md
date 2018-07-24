@@ -2,10 +2,11 @@
 ## Prerequisites:
 	* Python 3.6
 	* python packages:
-      + h5py
+		+ h5py
 		+ scipy
 		+ numpy
 	* BWA MEM
+	* SAMTOOLS
 	* HDF5
 
 ## Install:
