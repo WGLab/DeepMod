@@ -1,1 +1,0 @@
-/home/liuq1/project/nanopore/NanoDeepMod_v0.1.4/bin/scripts/__init__.py
