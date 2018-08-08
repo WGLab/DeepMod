@@ -3,7 +3,6 @@
 	* Python 3.6
 	* python packages:
 		+ h5py
-		+ scipy
 		+ numpy
 	* BWA MEM
 	* SAMTOOLS
