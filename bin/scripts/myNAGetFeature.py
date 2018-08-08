@@ -37,7 +37,11 @@ def mGetFeature1(moptions, sp_options, f5files):
       print ("Write consuming time %d" % (end_time-start_time))
    
    temp_sam = tempfile.NamedTemporaryFile()
-   cmd_opt = ['mem', '-x', 'ont2d', '-v', '1', '-t', '1', moptions['Ref'], temp_fa.name]
+   #cmd_opt = ['mem', '-x', 'ont2d', '-v', '1', '-t', '1', moptions['Ref'], temp_fa.name]
+   if moptions['alignStr']=='bwa':
+      cmd_opt = ['mem', '-x', 'ont2d', '-v', '1', '-t', '1', moptions['Ref'], temp_fa.name]
+   else:
+      cmd_opt = ['-ax', 'map-ont', moptions['Ref'], temp_fa.name]
    returncode = subprocess.call([moptions['alignStr'],]+cmd_opt, stdout=temp_sam)
    if not returncode==0:
       print ('Fatal Error!!! returncode is non-zero(%d) for "%s"' % (returncode, curcmd))
@@ -442,7 +446,7 @@ def getFeature_handler(moptions, h5files_Q, failed_Q):
   
 def mGetFeature_manager(moptions):
    #moptions['testrnn'] = True; #moptions['testrnn'] = False;
-   moptions['alignStr'] = 'bwa'
+   #moptions['alignStr'] = 'bwa'
    
    start_time = time.time();
 

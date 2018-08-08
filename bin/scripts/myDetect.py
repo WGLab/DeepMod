@@ -356,7 +356,11 @@ def mDetect1(moptions, sp_options, f5files):
       print ("Write consuming time %d" % (end_time-start_time))
    
    temp_sam = tempfile.NamedTemporaryFile()
-   cmd_opt = ['mem', '-x', 'ont2d', '-v', '1', '-t', '1', moptions['Ref'], temp_fa.name]
+   #cmd_opt = ['mem', '-x', 'ont2d', '-v', '1', '-t', '1', moptions['Ref'], temp_fa.name]
+   if moptions['alignStr']=='bwa':
+      cmd_opt = ['mem', '-x', 'ont2d', '-v', '1', '-t', '1', moptions['Ref'], temp_fa.name]
+   else:
+      cmd_opt = ['-ax', 'map-ont', moptions['Ref'], temp_fa.name]
    returncode = subprocess.call([moptions['alignStr'],]+cmd_opt, stdout=temp_sam)
    if not returncode==0:
       print ('Fatal Error!!! returncode is non-zero(%d) for "%s"' % (returncode, curcmd))
@@ -441,6 +445,17 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
 
      #print (f5data[readk][3]);
      _, flag, rname, pos, cigar, readseq = f5align[readk]
+
+     if (not moptions['ConUnk']) and ((not rname.find('_')==-1) or (not rname.find('-')==-1) or (not rname.find('/')==-1) or (not rname.find(':')==-1)):
+        continue;
+     isinreg = False;
+     for cur_mr in moptions['region']:
+        if (cur_mr[0] in ['', None, rname]):
+           isinreg = True;
+           break;
+     if not isinreg:
+        continue;
+
      if rname not in sp_param['ref_info']:
         getRefSeq(moptions, sp_param, rname)
      refseq = sp_param['ref_info'][rname]
@@ -1116,7 +1131,7 @@ def mDetect_manager(moptions):
 
    if moptions['predDet']==1:
       #moptions['testrnn'] = True; #moptions['testrnn'] = False;
-      moptions['alignStr'] = 'bwa'
+      #moptions['alignStr'] = 'bwa'
    
       if moptions['modfile'].rfind('/')==-1:
          moptions['modfile'] = [moptions['modfile'], './']

@@ -59,6 +59,8 @@ def mCommonParam(margs):
    ErrorMessage = ErrorMessage + non_negative(moptions['windowsize'], 'windowsize')
    if moptions['windowsize']<1: moptions['windowsize'] = 1
 
+   moptions['alignStr'] = margs.alignStr;
+
    return [moptions, ErrorMessage]
 
 def mDetect(margs):
@@ -66,6 +68,7 @@ def mDetect(margs):
 
    moptions['basecall_1d'] = margs.basecall_1d
    moptions['basecall_2strand'] = margs.basecall_2strand
+   moptions['ConUnk'] = margs.ConUnk
 
    moptions['predDet'] = margs.predDet
    if moptions['predDet']:
@@ -330,6 +333,7 @@ com_group_for_comparison.add_argument("--recursive", type=int, default=1, choice
 com_group_for_comparison.add_argument("--threads", type=int, default=4, help="The number of threads used (not for train). Default:4")
 com_group_for_comparison.add_argument("--files_per_thread", type=int, default=1000, help="The number of fast5 files for each thread (not for train). Default:1000")
 com_group_for_comparison.add_argument("--windowsize", type=int, default=51, help="The window size to extract features. Default: 51")
+com_group_for_comparison.add_argument("--alignStr", type=str, default='bwa', choices=["bwa","minimap2"], help="Alignment tools (bwa or minimap2 is supported). Default: bwa")
 
 parser_detect = subparsers.add_parser('detect', parents=[parent_parser], help="Detect modifications at a genomic scale", description="Detect modifications by integrating all long reads for a genome", epilog="For example, \n \
 python %(prog)s --wrkBase ctrl_oligo_SpeI_cut --FileID mod_det --outFolder ./mod_output/detect3 \n \
@@ -345,6 +349,7 @@ parser_detect.add_argument("--basecall_1d", default="Basecall_1D_000", help="Pat
 parser_detect.add_argument("--basecall_2strand", default="BaseCalled_template", help="Path for basecall_2strand. Default: BaseCalled_template")
 #parser_detect.add_argument("--region", default=":1000000:2000000", help="The region of interest: for example, chr:1:100000;chr2:10000");
 parser_detect.add_argument("--region", default=None, help="The region of interest: for example, chr:1:100000;chr2:10000");
+parser_detect.add_argument("--ConUnk", default=True, choices=[False, True], help="Whether contain unknown chromosome"); 
 parser_detect.set_defaults(func=mDetect)
 
 
