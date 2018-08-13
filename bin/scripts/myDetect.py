@@ -444,7 +444,12 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
      sp_param['mfile_path'] = f5data[readk][3]
 
      #print (f5data[readk][3]);
-     _, flag, rname, pos, cigar, readseq = f5align[readk]
+     mapq, flag, rname, pos, cigar, readseq = f5align[readk]
+
+     if mapq<10:
+        raiseError("Mapping quality is lower than 20", sp_param, "Mapping quality is lower than 20");
+        sp_options["Error"]["Mapping quality is lower than 20"].append(f5data[readk][3])
+        continue;
 
      if (not moptions['ConUnk']) and ((not rname.find('_')==-1) or (not rname.find('-')==-1) or (not rname.find('/')==-1) or (not rname.find(':')==-1)):
         continue;
