@@ -114,7 +114,11 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
         feat_file_ind += 1
 
      #print (f5data[readk][3]);
-     _, flag, rname, pos, cigar, readseq = f5align[readk]
+     mapq, flag, rname, pos, cigar, readseq = f5align[readk]
+     if mapq<10:
+        raiseError("Mapping quality is lower than 20", sp_param, "Mapping quality is lower than 20");
+        sp_options["Error"]["Mapping quality is lower than 20"].append(f5data[readk][3])
+        continue;
 
      if not ( (rname in moptions['fulmodlist'] and len(moptions['fulmodlist'][rname])>0) or \
         ((not moptions['anymodlist']==None) and rname in moptions['anymodlist'] and len(moptions['anymodlist'][rname])>0) or \
@@ -376,6 +380,30 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
       #      cgpos[1].extend([(forward_reverse, base_map_info['refbasei'][addi]) for addi in range(aligni-affectneighbor if aligni-affectneighbor>-1 else 0, aligni+affectneighbor+1)])
       if (not base_map_info['refbase'][aligni]=='-') and \
          (forward_reverse, base_map_info['refbasei'][aligni]) in moptions['fulmodlist'][rname]:
+         if not base_map_info['readbase'][aligni]=='-':
+            nextnogap = aligni + 1;
+            while nextnogap<len(base_map_info):
+               if not base_map_info['refbase'][nextnogap]=='-': break;
+               nextnogap += 1
+            iscg = False;
+            for checkneighbornum in checkneighbornums:
+               if not nextnogap<len(base_map_info): continue;
+               matchnum = 0; gapnum = 0;
+               for checki in range(aligni-checkneighbornum, aligni+checkneighbornum+1):
+                  if checki>-1 and checki<len(base_map_info):
+                     if base_map_info['refbase'][checki]==base_map_info['readbase'][checki]: matchnum += 1
+                     if base_map_info['refbase'][checki]=='-' or base_map_info['readbase'][checki]=='-': gapnum += 1
+               if gapnum<=checkratios[checkneighbornum][3]:
+                  for addi in range(aligni-affectneighbor if aligni-affectneighbor>-1 else 0, nextnogap+affectneighbor if nextnogap+affectneighbor<len(base_map_info) else len(base_map_info)):
+                     if addi==aligni:
+                        cgpos[0].append((forward_reverse, base_map_info['refbasei'][addi]))
+                     else:
+                        cgpos[1].append((forward_reverse, base_map_info['refbasei'][addi]))
+                  iscg = True; break;
+            if iscg: continue;
+      '''
+      if (not base_map_info['refbase'][aligni]=='-') and \
+         (forward_reverse, base_map_info['refbasei'][aligni]) in moptions['fulmodlist'][rname]:
          if not base_map_info['readbase'][aligni]=='-' and base_map_info['refbase'][aligni]==base_map_info['readbase'][aligni]:
             nextnogap = aligni + 1;
             while nextnogap<len(base_map_info):
@@ -398,7 +426,7 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
                      else:
                         cgpos[1].append((forward_reverse, base_map_info['refbasei'][addi]))
                   iscg = True; break;
-            if iscg: continue;
+            if iscg: continue;'''
          if not base_map_info['readbase'][aligni]=='-':
             nextnogap = aligni
             for _ in range(affectneighbor):
@@ -438,6 +466,10 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
 
    print ('%s%s %d, %d >> %d %d, %d-%d=%d' % (forward_reverse, f5data[readk][3], len(cgpos[0]), len(cgpos[1]), len(modevents)-end_clip-start_clip, start_clip, len(modevents), end_clip, len(modevents)-end_clip))
 
+   #if True:
+   #   for curpospos in cgpos[0]:
+   #      print(curpospos)
+
    aligni = 0; isdif = False;
    for ie in range(start_clip-100, len(modevents)-end_clip+100):
       cur_row_num = ie - (start_clip-100)
@@ -450,6 +482,8 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
             if not base_map_info['refbase'][aligni]=='-':
                if forward_reverse=='+': align_ref_pos += 1
                else: align_ref_pos -= 1
+            #if True:
+            #   print("pos=%10d %s meth=(%d, %d) %s=?=%s" % (align_ref_pos, forward_reverse, mfeatures[cur_row_num][1], mfeatures[cur_row_num][2], base_map_info['refbase'][aligni], base_map_info['readbase'][aligni]))
             aligni += 1
          if not base_map_info['readbase'][aligni] == modevents['model_state'][ie][2]:
             print ('Error Does not match', base_map_info['readbase'][aligni], modevents['model_state'][ie][2], aligni, ie)
@@ -476,6 +510,9 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
             if forward_reverse=='+': align_ref_pos += 1
             else: align_ref_pos -= 1
          aligni += 1
+
+      #if True:
+      #   print("pos=%10d %s meth=(%d, %d) %s=?=%s" % (mfeatures[cur_row_num][0], forward_reverse, mfeatures[cur_row_num][1], mfeatures[cur_row_num][2], base_map_info['refbase'][aligni-1], base_map_info['readbase'][aligni-1]))
 
       if ie>=0 and ie<len(modevents) and moptions['fnum']==53:
          for currs in sp_param['f5data'][readk][2][modevents['start'][ie]:int(modevents['start'][ie]+int(modevents['length'][ie]+0.5))]:
@@ -612,15 +649,15 @@ def getFeature_manager(moptions):
       moptions['anymodlist'] = None
       moptions['nomodlist'] = None
    elif moptions['motifORPos']==2:
-      fuldfiles = [glob.glob(moptions["fulmod"])];
+      fuldfiles = glob.glob(moptions["fulmod"]);
       moptions['fulmodlist'] = defaultdict(lambda: defaultdict());
       if not moptions["anymod"]==None:
-         anydfiles = [glob.glob(moptions["anymod"])]
+         anydfiles = glob.glob(moptions["anymod"])
          moptions['anymodlist'] = defaultdict(lambda: defaultdict());
       else:
          moptions['anymodlist'] = None
       if not moptions["nomod"]==None:
-         nodfiles = [glob.glob(moptions["nomod"])]
+         nodfiles = glob.glob(moptions["nomod"])
          moptions['nomodlist'] = defaultdict(lambda: defaultdict());
       else:
          moptions['nomodlist'] = None

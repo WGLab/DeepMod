@@ -240,12 +240,12 @@ def mGetFeatures(margs):
    #            if rv_ind>0: cur_r[rv_ind] = int(cur_r[rv_ind])
    #      moptions['region'].append(cur_r)
 
+   moptions['Ref'] = margs.Ref
+   if moptions['Ref']==None or (not os.path.isfile(moptions['Ref'])):
+      ErrorMessage = ErrorMessage + ("\n\t reference file does not exist (%s)" % moptions['Ref'])
    moptions['motifORPos'] = margs.motifORPos
    if margs.motifORPos==1:
       moptions['motif'] = [margs.motif.upper(), margs.ModinMotif]
-      moptions['Ref'] = margs.Ref
-      if moptions['Ref']==None or (not os.path.isfile(moptions['Ref'])):
-         ErrorMessage = ErrorMessage + ("\n\t reference file does not exist (%s)" % moptions['Ref'])
    elif margs.motifORPos==2:
       moptions['fulmod'] = margs.fulmod
       if moptions['fulmod']==None:
