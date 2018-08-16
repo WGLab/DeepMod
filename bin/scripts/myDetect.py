@@ -22,8 +22,8 @@ from . import myCom
 #import myCom
 
 #rnn_pred_batch_size = 3072;
-#rnn_pred_batch_size = 512
-rnn_pred_batch_size = 1024
+rnn_pred_batch_size = 512
+#rnn_pred_batch_size = 1024
 
 fast5_channel_id= 'UniqueGlobalKey/channel_id'
 fast5_analysis = ''.join(['/', myCom.analyses_base]) #
@@ -801,7 +801,7 @@ def mPredict1(moptions, sp_options, sp_param, mfeatures, base_map_info, readk, s
    sp_options['rnn'][0].run(sp_options['rnn'][3])
  
    #print(len(test_feature)) 
-   if len(test_feature) > rnn_pred_batch_size*2:
+   if len(test_feature) > rnn_pred_batch_size*1.2:
       x_sub_group = np.array_split(test_feature, int(len(test_feature)/rnn_pred_batch_size))
       y_sub_group = np.array_split(test_label,   int(len(test_feature)/rnn_pred_batch_size))
    else:

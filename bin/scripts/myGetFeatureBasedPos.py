@@ -401,9 +401,7 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
                         cgpos[1].append((forward_reverse, base_map_info['refbasei'][addi]))
                   iscg = True; break;
             if iscg: continue;
-      '''
-      if (not base_map_info['refbase'][aligni]=='-') and \
-         (forward_reverse, base_map_info['refbasei'][aligni]) in moptions['fulmodlist'][rname]:
+         '''
          if not base_map_info['readbase'][aligni]=='-' and base_map_info['refbase'][aligni]==base_map_info['readbase'][aligni]:
             nextnogap = aligni + 1;
             while nextnogap<len(base_map_info):
@@ -678,6 +676,7 @@ def getFeature_manager(moptions):
       if len(moptions['fulmodlist'][tchr])>0 or ((not moptions['anymodlist']==None) and len(moptions['anymodlist'][tchr])>0):
          print ('%s fulmod=%d anymod=%d nomod=%d' % (tchr, len(moptions['fulmodlist'][tchr]), len(moptions['anymodlist'][tchr]) if (not moptions['anymodlist']==None) else -1, len(moptions['nomodlist'][tchr]) if (not moptions['nomodlist']==None) else -1))
 
+   #if False: 
    if True: #False:
       f5files = glob.glob(os.path.join(moptions['wrkBase'],"*.fast5" ))
       if moptions['recursive']==1:

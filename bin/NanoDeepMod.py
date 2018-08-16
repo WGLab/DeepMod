@@ -243,6 +243,7 @@ def mGetFeatures(margs):
    moptions['Ref'] = margs.Ref
    if moptions['Ref']==None or (not os.path.isfile(moptions['Ref'])):
       ErrorMessage = ErrorMessage + ("\n\t reference file does not exist (%s)" % moptions['Ref'])
+
    moptions['motifORPos'] = margs.motifORPos
    if margs.motifORPos==1:
       moptions['motif'] = [margs.motif.upper(), margs.ModinMotif]
