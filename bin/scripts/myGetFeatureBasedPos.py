@@ -116,7 +116,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
      #print (f5data[readk][3]);
      mapq, flag, rname, pos, cigar, readseq = f5align[readk]
      if mapq<10:
-        raiseError("Mapping quality is lower than 20", sp_param, "Mapping quality is lower than 20");
+        #raiseError("Mapping quality is lower than 20", sp_param, "Mapping quality is lower than 20");
         sp_options["Error"]["Mapping quality is lower than 20"].append(f5data[readk][3])
         continue;
 
