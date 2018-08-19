@@ -224,6 +224,9 @@ def getTFiles(folder1, folder2, moptions):
    t1files = glob.glob(os.path.join(folder1, "*.xy.gz"))
    if moptions['recursive']==1:
       t1files.extend(glob.glob(os.path.join(folder1, "*/*.xy.gz")))
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*.xy.gz")))
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*.xy.gz")))
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*/*.xy.gz")))
    print("Get folder1");
    print(t1files.__sizeof__(), len(t1files))
    if moptions['test'][0] == '0':
@@ -238,6 +241,9 @@ def getTFiles(folder1, folder2, moptions):
       t2files = glob.glob(os.path.join(folder2, "*.xy.gz"))
       if moptions['recursive']==1:
          t2files.extend(glob.glob(os.path.join(folder2, "*/*.xy.gz")))
+         t2files.extend(glob.glob(os.path.join(folder2, "*/*/*.xy.gz")))
+         t2files.extend(glob.glob(os.path.join(folder2, "*/*/*/*.xy.gz")))
+         t2files.extend(glob.glob(os.path.join(folder2, "*/*/*/*/*.xy.gz")))
       print("Get folder2");
       print(t2files.__sizeof__(), len(t2files))
       if moptions['test'][0] == '0':

@@ -489,7 +489,9 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
          mfeatures[cur_row_num][0] = align_ref_pos
          #mfeatures[cur_row_num][1] = 0; mfeatures[cur_row_num][2] = 0
          if moptions['posneg'] == 0:
-            mfeatures[cur_row_num][1] = 1; mfeatures[cur_row_num][2] = 0
+            if moptions['nomodlist']==None or ( rname in moptions['nomodlist'] and (forward_reverse, base_map_info['refbasei'][aligni]) in moptions['nomodlist'][rname] ):
+               mfeatures[cur_row_num][1] = 1; mfeatures[cur_row_num][2] = 0
+            #mfeatures[cur_row_num][1] = 1; mfeatures[cur_row_num][2] = 0
          else:
             if (forward_reverse, base_map_info['refbasei'][aligni]) in cgpos[0] and (not base_map_info['refbase'][aligni]=='-'):
                mfeatures[cur_row_num][1] = 0; mfeatures[cur_row_num][2] = 1
@@ -591,7 +593,7 @@ def readFA(mfa, t_chr=None):
                   fadict[cur_chr] = []
             else:
                if t_chr in [None, cur_chr]:
-                  fadict[cur_chr].append(line)
+                  fadict[cur_chr].append(line.upper())
          line = mr.readline();
       if (not cur_chr==None) and (t_chr in [None, cur_chr]):
          fadict[cur_chr] = ''.join(fadict[cur_chr])
@@ -606,11 +608,18 @@ def readMotifMod(fadict, mpat='Cg', mposinpat=0, t_chr=None, t_start=None, t_end
 
    fakeys = fadict.keys();
    cpgdict = defaultdict(int);
+   all_a = defaultdict()
    for fak in fakeys:
        cpgnum = [0, 0]
        cpgdict[fak] = defaultdict()
+       all_a[fak] = defaultdict()
        for i in range(len(fadict[fak])):
           if (t_start==None or i>=t_start) and (t_end==None or i<=t_end):
+             if fadict[fak][i]==mpat[mposinpat]:
+                all_a[fak][('+', i)] = True;
+             elif get_complement(fadict[fak][i])==mpat[mposinpat]:
+                all_a[fak][('-', i)] = True;
+
              if i-mposinpat>=0 and i+len(comp_pat3)-1-mposinpat<len(fadict[fak]) and ''.join(fadict[fak][i-mposinpat:(i+len(comp_pat3)-1-mposinpat+1)])==pat3:
                 cpgdict[fak][('+', i)] = [1, fadict[fak][i]]; cpgnum[0] += 1
                 #cpgdict[fak][('-', i)] = [0, fadict[fak][i]]
@@ -622,7 +631,7 @@ def readMotifMod(fadict, mpat='Cg', mposinpat=0, t_chr=None, t_start=None, t_end
                 #cpgdict[fak][('-', i)] = [0, fadict[fak][i]]
                 pass
        print('%s%d site: %d(+) %d(-) for %s' % (pat3, mposinpat, cpgnum[0], cpgnum[1], fak))
-   return cpgdict
+   return (cpgdict, all_a)
 
 
 
@@ -643,9 +652,9 @@ def getFeature_manager(moptions):
 
    fadict = readFA(moptions['Ref'],moptions['region'][0])
    if moptions['motifORPos']==1:
-      moptions['fulmodlist'] = readMotifMod(fadict, moptions['motif'][0], moptions['motif'][1], moptions['region'][0], moptions['region'][1], moptions['region'][2])
+      moptions['fulmodlist'], moptions['nomodlist'] = readMotifMod(fadict, moptions['motif'][0], moptions['motif'][1], moptions['region'][0], moptions['region'][1], moptions['region'][2])
       moptions['anymodlist'] = None
-      moptions['nomodlist'] = None
+      #moptions['nomodlist'] = None
    elif moptions['motifORPos']==2:
       fuldfiles = glob.glob(moptions["fulmod"]);
       moptions['fulmodlist'] = defaultdict(lambda: defaultdict());
