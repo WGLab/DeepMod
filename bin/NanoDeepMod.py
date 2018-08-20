@@ -180,6 +180,11 @@ def mTrain(margs):
    moptions['hidden'] = margs.hidden
    ErrorMessage = ErrorMessage + non_negative(moptions['hidden'], 'hidden')
 
+   moptions['modfile'] = margs.modfile
+   if moptions['modfile']==None: pass;
+   elif (not os.path.isfile(moptions['modfile']+'.meta')):
+      ErrorMessage = ErrorMessage + ("\n\tThe meta file (%s) does not exist" % (moptions['modfile']+'.meta' if not moptions['modfile']==None else ""))
+
    if not margs.test==None:
       moptions['test'] = margs.test.split(',')
       if moptions['test'][0] == 'E': moptions['test'][0] = '-'
@@ -372,6 +377,7 @@ python %(prog)s --wrkBase /scr1/users/liuq1/project/deepnanomod/aoe53features/um
 parser_training.add_argument("--wrkBase2", help="The base folder for long reads without any modifications.")
 parser_training.add_argument("--fnum", type=int, default=53, help="The number of features. Default: 53")
 parser_training.add_argument("--hidden", type=int, default=100, help="The number of hidden node. Default: 100")
+parser_training.add_argument("--modfile", type=str, default=None, help="The path to load training model. Default: 'mod_output/'")
 parser_training.add_argument("--test", help="The number of E Coli genomic position for testing. Default: 'E,1,2'")
 parser_training.set_defaults(func=mTrain)
 

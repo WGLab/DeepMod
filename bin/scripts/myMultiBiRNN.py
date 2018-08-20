@@ -117,8 +117,12 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
       config.gpu_options.per_process_gpu_memory_fraction = 0.5
    else: config.gpu_options.allow_growth = True
    with tf.Session(config=config) as sess:
-      sess.run(init);
-      sess.run(init_l) 
+      if 'modfile' in moptions and (not moptions['modfile']==None) and len(moptions['modfile'])==2:
+         new_saver = tf.train.import_meta_graph(moptions['modfile'][0]+'.meta')
+         new_saver.restore(sess,tf.train.latest_checkpoint(moptions['modfile'][1])) 
+      else:
+         sess.run(init);
+         sess.run(init_l) 
       start_time = time.time(); start_c_time = time.time();
       io_time = 0;
 
@@ -182,13 +186,13 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
 
              ifl=3 if len(featurelist)>3 else len(featurelist)-1
              if (file_group_id[0]+1) - last_desplay_files_num >= desplay_files:
-                sess.run(init_l)
-                loss, aucm, acc, p, r = sess.run([loss_op, auc_op[1], accuracy, mpre[1], mspf[1]], feed_dict={X:featurelist[ifl][0][0], Y:featurelist[ifl][1][0]})
-                sess.run(init_l)
-                if ifl>0: ifl -= 1
-                loss2, aucm2, acc2, p2, r2 = sess.run([loss_op, auc_op[1], accuracy, mpre[1], mspf[1]], feed_dict={X:featurelist[ifl][0][0], Y:featurelist[ifl][1][0]})
-                print("   Train#files "+str(file_group_id[0]+1)+", loss="+"{:.3f}".format(loss)+", AUC="+"{:.3f}".format(aucm)+", acc="+"{:.3f}".format(acc)+", p="+"{:.3f}".format(p)+", r="+"{:.3f}".format(r)+(' %d/%d/%d %d/%d, %d:%d(%d:%d) %d/%d' % (len(featurelist[ifl][0])*batchsize, len(featurelist[ifl][0][0][0]), len(featurelist[ifl][0][0][0][0]), len(featurelist[ifl][1])*batchsize, len(featurelist[ifl][1][0][0]), np.sum(featurelist[ifl][1][0][:,0]), np.sum(featurelist[ifl][1][0][:,1]), np.sum(featurelist[ifl][1][0][:batchsize,1]), np.sum(featurelist[ifl+1][1][0][:batchsize,1]), len(featurelist[ifl][0]), len(featurelist[ifl][1])))+"\n                  loss="+"{:.3f}".format(loss2)+", AUC="+"{:.3f}".format(aucm2)+", acc="+"{:.3f}".format(acc2)+", p="+"{:.3f}".format(p2)+", r="+"{:.3f}".format(r2) + (", %d/%d=%d" % (file_group_id[0], len(filelists[0]), int(file_group_id[0]*100/float(len(filelists[0]))) ) ) );
-                sys.stdout.flush()
+                # sess.run(init_l)
+                # loss, aucm, acc, p, r = sess.run([loss_op, auc_op[1], accuracy, mpre[1], mspf[1]], feed_dict={X:featurelist[ifl][0][0], Y:featurelist[ifl][1][0]})
+                # sess.run(init_l)
+                # if ifl>0: ifl -= 1
+                # loss2, aucm2, acc2, p2, r2 = sess.run([loss_op, auc_op[1], accuracy, mpre[1], mspf[1]], feed_dict={X:featurelist[ifl][0][0], Y:featurelist[ifl][1][0]})
+                # print("   Train#files "+str(file_group_id[0]+1)+", loss="+"{:.3f}".format(loss)+", AUC="+"{:.3f}".format(aucm)+", acc="+"{:.3f}".format(acc)+", p="+"{:.3f}".format(p)+", r="+"{:.3f}".format(r)+(' %d/%d/%d %d/%d, %d:%d(%d:%d) %d/%d' % (len(featurelist[ifl][0])*batchsize, len(featurelist[ifl][0][0][0]), len(featurelist[ifl][0][0][0][0]), len(featurelist[ifl][1])*batchsize, len(featurelist[ifl][1][0][0]), np.sum(featurelist[ifl][1][0][:,0]), np.sum(featurelist[ifl][1][0][:,1]), np.sum(featurelist[ifl][1][0][:batchsize,1]), np.sum(featurelist[ifl+1][1][0][:batchsize,1]), len(featurelist[ifl][0]), len(featurelist[ifl][1])))+"\n                  loss="+"{:.3f}".format(loss2)+", AUC="+"{:.3f}".format(aucm2)+", acc="+"{:.3f}".format(acc2)+", p="+"{:.3f}".format(p2)+", r="+"{:.3f}".format(r2) + (", %d/%d=%d" % (file_group_id[0], len(filelists[0]), int(file_group_id[0]*100/float(len(filelists[0]))) ) ) );
+                # sys.stdout.flush()
                 last_desplay_files_num = (file_group_id[0]+1) - ((file_group_id[0]+1) % desplay_files)
 
              if 49.5<int(file_group_id[0]*100/float(len(filelists[0])))<50.5:
@@ -209,6 +213,9 @@ def getTFiles1(folder1, moptions):
    t1files = glob.glob(os.path.join(folder1, "*.xy.gz"))
    if moptions['recursive']==1:
       t1files.extend(glob.glob(os.path.join(folder1, "*/*.xy.gz")))
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*.xy.gz"))); 
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*.xy.gz"))); 
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*/*.xy.gz")));
    print("Get folder1");
    print(t1files.__sizeof__(), len(t1files))
    if moptions['test'][0] == '0':
@@ -221,12 +228,12 @@ def getTFiles1(folder1, moptions):
    return t1files
 
 def getTFiles(folder1, folder2, moptions):
-   t1files = glob.glob(os.path.join(folder1, "*.xy.gz"))
+   t1files = glob.glob(os.path.join(folder1, "*.xy.gz")); #print(t1files.__sizeof__(), len(t1files))
    if moptions['recursive']==1:
-      t1files.extend(glob.glob(os.path.join(folder1, "*/*.xy.gz")))
-      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*.xy.gz")))
-      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*.xy.gz")))
-      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*/*.xy.gz")))
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*.xy.gz"))); #print(t1files.__sizeof__(), len(t1files))
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*.xy.gz"))); #print(t1files.__sizeof__(), len(t1files))
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*.xy.gz"))); #print(t1files.__sizeof__(), len(t1files))
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*/*.xy.gz"))); #print(t1files.__sizeof__(), len(t1files))
    print("Get folder1");
    print(t1files.__sizeof__(), len(t1files))
    if moptions['test'][0] == '0':
@@ -355,6 +362,8 @@ def mMult_RNN_LSTM_train(moptions):
    for i in range(len(filegroups)):
       filegroups[i] = filegroups[i].split(',')
 
+   print(filegroups)
+
    filelists = [[] for _ in range(len(filegroups))]
    for i in range(len(filegroups)):
       for fgj in range(len(filegroups[i])):
@@ -368,6 +377,12 @@ def mMult_RNN_LSTM_train(moptions):
          mostnum = len(filelists[i])
          mostid = i;
 
+   if 'modfile' in moptions and (not moptions['modfile']==None):
+      if moptions['modfile'].rfind('/')==-1:
+         moptions['modfile'] = [moptions['modfile'], './']
+      else:
+         moptions['modfile'] = [moptions['modfile'], moptions['modfile'][:moptions['modfile'].rfind('/')+1]]
+ 
    if not mostid==0:
       filelists[mostid], filelists[0] = filelists[0], filelists[mostid]
 
