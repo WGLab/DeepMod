@@ -1,26 +1,21 @@
 
-#################################
-# https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/3_NeuralNetworks/bidirectional_rnn.py
-#######################################
 
 import tensorflow as tf
 from tensorflow.contrib import rnn
 import numpy as np
 
+import math
+
 import glob, os, sys, time;
 
 from collections import defaultdict
 
-#batchsize = 4096; # 2048
-#batchsize = 3072; 
-#
-#batchsize = 4096;
-#batchsize = 3072;
 batchsize = 2048;
 
-class_weights = tf.constant([0.4,0.6])
+class_weights = tf.constant([0.9,0.1])
+class_weights = tf.constant([0.1,0.9])
 
-def mCreateSession(num_input, num_hidden, timesteps):
+def mCreateSession(num_input, num_hidden, timesteps, moptions):
    num_classes = 2;
    numlayers = 3;
 
@@ -35,10 +30,6 @@ def mCreateSession(num_input, num_hidden, timesteps):
    def BiRNN(x, weights, biases):
       x = tf.unstack(x, timesteps, 1);
    
-      # https://www.programcreek.com/python/example/102773/tensorflow.contrib.rnn.MultiRNNCell
-      # example 14
-      #lstm_fw_cell = rnn.BasicLSTMCell(num_hidden, forget_bias=1.0);
-      #lstm_bw_cell = rnn.BasicLSTMCell(num_hidden, forget_bias=1.0);
       lstm_fw_cell = rnn.MultiRNNCell([rnn.BasicLSTMCell(num_hidden, forget_bias=1.0) for _ in range(numlayers)]);
       lstm_bw_cell = rnn.MultiRNNCell([rnn.BasicLSTMCell(num_hidden, forget_bias=1.0) for _ in range(numlayers)]);
 
@@ -48,25 +39,22 @@ def mCreateSession(num_input, num_hidden, timesteps):
       except Exception:
          outputs = rnn.static_bidirectional_rnn(lstm_fw_cell, lstm_bw_cell, x, dtype=tf.float32);
 
-      return tf.matmul(outputs[int(timesteps/2)], weights['out']) + biases['out']
+      if moptions['outputlayer'] in ['sigmoid']:
+         return tf.contrib.layers.fully_connected(outputs[int(timesteps/2)], num_outputs=num_classes, activation_fn=tf.nn.sigmoid);
+      else:
+         return tf.matmul(outputs[int(timesteps/2)], weights['out']) + biases['out']
 
    logits = BiRNN(X, weights, biases);
    prediction = tf.nn.softmax(logits)
 
    mfpred=tf.argmax(prediction,1) 
 
-   ## loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=Y))
    ###
-   loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=Y))
+   if 'unbalanced' in moptions and (not moptions['unbalanced']==None) and moptions['unbalanced']==1:  # class_weights
+      loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=tf.multiply(logits, class_weights), labels=Y))
+   else:
+      loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=Y))
    #
-   #https://stackoverflow.com/questions/40198364/how-can-i-implement-a-weighted-cross-entropy-loss-in-tensorflow-using-sparse-sof/46984951#46984951
-   #
-   #samples_weights = tf.gather(class_weights, mfpred);
-   #loss_op = tf.losses.sparse_softmax_cross_entropy(mfpred, logits, samples_weights) 
-   #https://stackoverflow.com/questions/35155655/loss-function-for-class-imbalanced-binary-classifier-in-tensor-flow
-   #loss_op = tf.nn.weighted_cross_entropy_with_logits(logits=logits, targets=Y, pos_weight=classes_weights)
-   #
-   # https://datascience.stackexchange.com/questions/17219/how-to-do-imbalanced-classification-in-deep-learning-tensorflow-rnn
    
    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate);
    train_op = optimizer.minimize(loss_op);
@@ -74,16 +62,9 @@ def mCreateSession(num_input, num_hidden, timesteps):
    correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1));
    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32));
 
-   #auc_op = tf.metrics.auc(Y, prediction)
-   #mpre = tf.metrics.precision(Y, prediction)
-   #mspf = tf.metrics.recall(Y, prediction)
-   #auc_op = tf.metrics.auc(tf.argmax(Y, 1), tf.argmax(prediction, 1))
    auc_op = tf.metrics.auc(Y, prediction)
    mpre = tf.metrics.precision(tf.argmax(Y, 1), tf.argmax(prediction, 1))
    mspf = tf.metrics.recall(tf.argmax(Y, 1), tf.argmax(prediction, 1))
-   #mpre = tf.metrics.precision(tf.cast(Y,tf.int32), tf.cast(prediction,tf.int32))
-   #mspf = tf.metrics.recall(tf.cast(Y,tf.int32), tf.cast(prediction,tf.int32))
-   #auc_op, mpre, mspf = None, None, None
 
    init = tf.global_variables_initializer();
    init_l = tf.local_variables_initializer()
@@ -93,13 +74,10 @@ def mCreateSession(num_input, num_hidden, timesteps):
    return (init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred)
 
 def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
-   #desplay_files = 20
-   #desplay_files = 2   # for 700M
-   #desplay_files = 30  # for 30M
    training_steps = 4
-   training_steps = 10
+   training_steps = 40
 
-   init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred = mCreateSession(num_input, mhidden, timesteps)
+   init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred = mCreateSession(num_input, mhidden, timesteps, moptions)
 
    desplay_files = len(filelists[0])/100
    if desplay_files<2: desplay_files = 2;
@@ -108,12 +86,12 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
    file_group_id = [0 for _ in range(len(filelists))];
    sumpsize = 25;
 
+   test_na = True;
+   test_na = False
+   if test_na: desplay_files = 1
+
    config = tf.ConfigProto()
-   #config.gpu_options.allow_growth = True
    if (timesteps>61 and num_input>50):
-      # for 81 of E1m2
-      config.gpu_options.per_process_gpu_memory_fraction = 0.6
-      # for 81 of P90
       config.gpu_options.per_process_gpu_memory_fraction = 0.5
    else: config.gpu_options.allow_growth = True
    with tf.Session(config=config) as sess:
@@ -145,6 +123,11 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
                       if ifl==0: break;
                       else: file_group_id[ifl] = 0
                    batch_2_x, batch_2_y, _ = getDataFromFile_new(filelists[ifl][file_group_id[ifl]], moptions)
+                   if test_na: 
+                      print('<< %d %s %d' % (file_group_id[ifl], filelists[ifl][file_group_id[ifl]], len(batch_2_x)))
+                      if len(batch_2_x)>0:
+                         print (batch_2_x[0])
+                      print()
                    if len(batch_2_y)>0:
                       if len(featurelist[ifl][0])==0:
                          featurelist[ifl][0] = batch_2_x
@@ -162,46 +145,57 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
                     if len(featurelist[0][0])*batchsize*1.2 < len(featurelist[ifl][0]):
                        featurelist[ifl][0] = featurelist[ifl][0][:int(len(featurelist[0][0])*batchsize*1.2)]
                        featurelist[ifl][1] = featurelist[ifl][1][:int(len(featurelist[0][0])*batchsize*1.2)]
+                if len(featurelist[0][0])<1: continue
              #
-             if (file_group_id[0]+1) - last_desplay_files_num >= desplay_files: msizeprint = ['Read row info', str(len(featurelist[0][0]))]
-             for ifl in range(1, len(filelists)):
-                if (file_group_id[0]+1) - last_desplay_files_num >= desplay_files: msizeprint.append(str(len(featurelist[ifl][0])))
-                featurelist[ifl][0] = np.array_split(featurelist[ifl][0], len(featurelist[0][0]))
-                featurelist[ifl][1] = np.array_split(featurelist[ifl][1], len(featurelist[0][0]))
-             if (file_group_id[0]+1) - last_desplay_files_num >= desplay_files: print (' '.join(msizeprint))
+             if len(filelists)>1:
+                for ifl in range(1, len(filelists)):
+                   #if (file_group_id[0]+1) - last_desplay_files_num >= desplay_files: msizeprint.append(str(len(featurelist[ifl][0])))
+                   featurelist[ifl][0] = np.array_split(featurelist[ifl][0], len(featurelist[0][0]))
+                   featurelist[ifl][1] = np.array_split(featurelist[ifl][1], len(featurelist[0][0]))
              io_time += (time.time() - io_start_time)
 
              ifl=3 if len(featurelist)>3 else len(featurelist)-1
              if (file_group_id[0]+1) - last_desplay_files_num >= desplay_files: 
                 sess.run(init_l)
-                loss, aucm, acc, p, r = sess.run([loss_op, auc_op[1], accuracy, mpre[1], mspf[1]], feed_dict={X:featurelist[ifl][0][0], Y:featurelist[ifl][1][0]})
-                print(">>>Tratin#files "+str(file_group_id[0]+1)+",loss="+"{:.3f}".format(loss)+",AUC="+"{:.3f}".format(aucm)+",acc="+"{:.3f}".format(acc)+",p="+"{:.3f}".format(p)+",r="+"{:.3f}".format(r)+(" Comsuming time: %d(current=%d) IO=%d(%.3f)" % (time.time()-start_time, time.time()-start_c_time, io_time, io_time/float(time.time()-start_time))));
-
+                try:
+                   loss, aucm, acc, p, r = sess.run([loss_op, auc_op[1], accuracy, mpre[1], mspf[1]], feed_dict={X:featurelist[ifl][0][0], Y:featurelist[ifl][1][0]})
+                   print(">>>Tratin#files "+str(file_group_id[0]+1)+",loss="+"{:.3f}".format(loss)+",AUC="+"{:.3f}".format(aucm)+",acc="+"{:.3f}".format(acc)+",p="+"{:.3f}".format(p)+",r="+"{:.3f}".format(r)+(" Comsuming time: %d(current=%d) IO=%d(%.3f)" % (time.time()-start_time, time.time()-start_c_time, io_time, io_time/float(time.time()-start_time))));
+                except:
+                   print(">>>Tratin#filesError "+str(file_group_id[0]+1)+(" Comsuming time: %d(current=%d) IO=%d(%.3f)" % (time.time()-start_time, time.time()-start_c_time, io_time, io_time/float(time.time()-start_time))));
                 sys.stdout.flush()
                 start_c_time = time.time();
 
              for subi in range(len(featurelist[0][0])):
                 for ifl in range(len(filelists)):
-                   sess.run(train_op, feed_dict={X:featurelist[ifl][0][subi], Y:featurelist[ifl][1][subi]})
+                   to = sess.run([train_op, loss_op], feed_dict={X:featurelist[ifl][0][subi], Y:featurelist[ifl][1][subi]})
+                   if len(featurelist)==1:
+                      if math.isnan(to[1]):
+                         for toj in range(len(featurelist[ifl][0][subi])):
+                            print('{} vs {}'.format(featurelist[ifl][1][subi][toj][0], featurelist[ifl][1][subi][toj][1]))
+                            for tok in featurelist[ifl][0][subi][toj]:
+                               opstr = []
+                               for tol in tok:
+                                   opstr.append(str(round(tol, 2)))
+                               print("\t\t\t"+','.join(opstr)) 
+                         sys.exit(1)
+                      
 
              ifl=3 if len(featurelist)>3 else len(featurelist)-1
              if (file_group_id[0]+1) - last_desplay_files_num >= desplay_files:
-                # sess.run(init_l)
-                # loss, aucm, acc, p, r = sess.run([loss_op, auc_op[1], accuracy, mpre[1], mspf[1]], feed_dict={X:featurelist[ifl][0][0], Y:featurelist[ifl][1][0]})
-                # sess.run(init_l)
-                # if ifl>0: ifl -= 1
-                # loss2, aucm2, acc2, p2, r2 = sess.run([loss_op, auc_op[1], accuracy, mpre[1], mspf[1]], feed_dict={X:featurelist[ifl][0][0], Y:featurelist[ifl][1][0]})
-                # print("   Train#files "+str(file_group_id[0]+1)+", loss="+"{:.3f}".format(loss)+", AUC="+"{:.3f}".format(aucm)+", acc="+"{:.3f}".format(acc)+", p="+"{:.3f}".format(p)+", r="+"{:.3f}".format(r)+(' %d/%d/%d %d/%d, %d:%d(%d:%d) %d/%d' % (len(featurelist[ifl][0])*batchsize, len(featurelist[ifl][0][0][0]), len(featurelist[ifl][0][0][0][0]), len(featurelist[ifl][1])*batchsize, len(featurelist[ifl][1][0][0]), np.sum(featurelist[ifl][1][0][:,0]), np.sum(featurelist[ifl][1][0][:,1]), np.sum(featurelist[ifl][1][0][:batchsize,1]), np.sum(featurelist[ifl+1][1][0][:batchsize,1]), len(featurelist[ifl][0]), len(featurelist[ifl][1])))+"\n                  loss="+"{:.3f}".format(loss2)+", AUC="+"{:.3f}".format(aucm2)+", acc="+"{:.3f}".format(acc2)+", p="+"{:.3f}".format(p2)+", r="+"{:.3f}".format(r2) + (", %d/%d=%d" % (file_group_id[0], len(filelists[0]), int(file_group_id[0]*100/float(len(filelists[0]))) ) ) );
-                # sys.stdout.flush()
                 last_desplay_files_num = (file_group_id[0]+1) - ((file_group_id[0]+1) % desplay_files)
 
              if 49.5<int(file_group_id[0]*100/float(len(filelists[0])))<50.5:
                 savp = '.50'
                 if (not os.path.isdir(moptions['outFolder']+str(step-1)+savp)):
                   os.system('mkdir -p '+moptions['outFolder']+str(step-1)+savp);
-                #if not os.path.isfile(moptions['outFolder']+str(step-1)+savp+'/'+moptions['FileID']+'.meta'):
-                #   saver.save(sess, moptions['outFolder']+str(step-1)+savp+'/'+moptions['FileID']);
                 saver.save(sess, moptions['outFolder']+str(step-1)+savp+'/'+moptions['FileID']);
+             if len(featurelist)==1:
+                cur_per = int(file_group_id[0]*100/float(len(filelists[0])))
+                if cur_per in [10, 20, 30, 40, 60, 70, 80, 90]:
+                    savp = str(round(cur_per/100.0, 2))
+                    if (not os.path.isdir(moptions['outFolder']+str(step-1)+savp)):
+                        os.system('mkdir -p '+moptions['outFolder']+str(step-1)+savp);
+                    saver.save(sess, moptions['outFolder']+str(step-1)+savp+'/'+moptions['FileID']);
          if (not os.path.isdir(moptions['outFolder']+str(step))): 
             os.system('mkdir -p '+moptions['outFolder']+str(step));
          saver.save(sess, moptions['outFolder']+str(step)+'/'+moptions['FileID']);
@@ -271,6 +265,7 @@ def getDataFromFile_new(fn, moptions, mfind0ld=None):
    if moptions['test'][0] in ['-', '+']:
       t0 = t0.astype(int)
 
+   nan_file = []
    m_data = []; m_y = [];
    if not mfind0ld==None:
       pos_to_file_dict = defaultdict();  preind = 0
@@ -286,11 +281,19 @@ def getDataFromFile_new(fn, moptions, mfind0ld=None):
          (moptions['test'][0]=='+' and (not moptions['test'][1]<t0[mind]<moptions['test'][2])):
          continue;
       ## for 61; does not work. memory issue;
-      m_y.append(ty[mind])
-      m_data.append(tx[(mind-int(moptions['windowsize']/2)):(mind+int(moptions['windowsize']/2)+1)])
-      ## for 7 to 51;
-      #m_y.append(np.copy(ty[mind]))
-      #m_data.append(np.copy(tx[(mind-int(moptions['windowsize']/2)):(mind+int(moptions['windowsize']/2)+1)]))
+      has_nan_value = False;
+      for cur_row in tx[(mind-int(moptions['windowsize']/2)):(mind+int(moptions['windowsize']/2)+1)]:
+         if np.isnan(cur_row).any():
+            has_nan_value = True;
+            break;
+      if has_nan_value:
+         if fn in nan_file: pass
+         else:
+             print ("Warning-nan-value {}".format(fn)) 
+             nan_file.append(fn);
+      else:
+         m_y.append(ty[mind])
+         m_data.append(tx[(mind-int(moptions['windowsize']/2)):(mind+int(moptions['windowsize']/2)+1)])
    if not mfind0ld==None:
       file_to_pos_dict = defaultdict();
       ptofkeys = sorted(list(pos_to_file_dict.keys()))
@@ -370,13 +373,14 @@ def mMult_RNN_LSTM_train(moptions):
          if not len(filegroups[i][fgj])>0: continue
          filelists[i].extend(getTFiles1(filegroups[i][fgj], moptions))
    mostnum, mostid = 0, -1;
-   np.random.seed(1)
+   np.random.seed(3)
    for i in range(len(filelists)):
       np.random.shuffle(filelists[i])
       if len(filelists[i])>mostnum:
          mostnum = len(filelists[i])
          mostid = i;
 
+   np.random.seed(7)
    if 'modfile' in moptions and (not moptions['modfile']==None):
       if moptions['modfile'].rfind('/')==-1:
          moptions['modfile'] = [moptions['modfile'], './']
@@ -392,7 +396,7 @@ def pred_entry(moptions):
 
    tfiles = getTFiles(moptions['wrkBase'], None, moptions)
 
-   init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred = mCreateSession(moptions['fnum'], moptions['hidden'], moptions['windowsize'])
+   init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred = mCreateSession(moptions['fnum'], moptions['hidden'], moptions['windowsize'], moptions)
 
    if moptions['modfile'].rfind('/')==-1:
       moptions['modfile'] = [moptions['modfile'], './']

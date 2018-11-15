@@ -1,6 +1,0 @@
-model_checkpoint_path: "mod_train_conmodA_P100wd51_f53ne2"
-all_model_checkpoint_paths: "../2/mod_train_conmodA_P100wd51_f53ne2"
-all_model_checkpoint_paths: "../3.50/mod_train_conmodA_P100wd51_f53ne2"
-all_model_checkpoint_paths: "../3/mod_train_conmodA_P100wd51_f53ne2"
-all_model_checkpoint_paths: "../4.50/mod_train_conmodA_P100wd51_f53ne2"
-all_model_checkpoint_paths: "mod_train_conmodA_P100wd51_f53ne2"

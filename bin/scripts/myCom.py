@@ -16,8 +16,8 @@ na_bp = {"A":"T", \
          "N":"N", \
          "n":"n" \
          }
-# on 20180806 add "N"
 
+g_ACGT = ['A', 'C', 'G', 'T']
 
 acgt = na_bp.keys();
 
