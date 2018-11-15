@@ -4,14 +4,14 @@
 	* python packages:
 		+ h5py
 		+ numpy
-	* BWA MEM
+	* BWA MEM/minimap2
 	* SAMTOOLS
 	* HDF5
 
 ## Install:
-	* git clone https://github.com/WGLab/NanoDeepMod
-	* The script to be run is bin/NanoDeepMod.py: `python bin/NanoDeepMod.py`
+	* git clone https://github.com/WGLab/DeepMod
+	* The script to be run is bin/NanoDeepMod.py: `python bin/DeepMod.py`
 	
 ## Usage:
- For how to use them, please refer to [Usage](https://github.com/WGLab/NanoDeepMod/blob/master/docs/Usage.md)
+ For how to use them, please refer to [Usage](https://github.com/WGLab/DeepMod/blob/master/docs/Usage.md)
 
