@@ -16,7 +16,7 @@ python DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolde
 ```
 
 
-# 2. How to merge different run of modification detection
+# 2. How to merge different runs of modification detection
 
 
 # 3. How to consider modification cluster effect.
