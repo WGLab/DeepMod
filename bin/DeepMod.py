@@ -372,7 +372,6 @@ parser_predict.set_defaults(func=mPredict)
 
 
 parser_training = subparsers.add_parser('train', parents=[parent_parser], help="Training a modification classifier", description="Training a modification classifier", epilog="For example, \n \
-python %(prog)s --wrkBase /scr1/users/liuq1/project/deepnanomod/aoe53features/umr --wrkBase2 /scr1/users/liuq1/project/deepnanomod/aoe53features/sss --FileID mod_train --outFolder ./mod_output/train1 \n \
 ", formatter_class=RawTextHelpFormatter)
 parser_training.add_argument("--wrkBase2", help="The base folder for long reads without any modifications.")
 parser_training.add_argument("--fnum", type=int, default=53, help="The number of features. Default: 53")
@@ -382,8 +381,6 @@ parser_training.add_argument("--test", help="The number of E Coli genomic positi
 parser_training.set_defaults(func=mTrain)
 
 parser_getfeatures = subparsers.add_parser('getfeatures', parents=[parent_parser], help="Get features for all fast5 files", description="Get features for all fast5 files", epilog="For example, \n \
-python %(prog)s --wrkBase /mnt/isilon/wang_lab/liuq1/nanopore/nanopolish/umr/160617_ecolilowinput_UMR9/called/pass --threads 48 --recursive 0 --posneg 0 --outFolder /scr1/users/liuq1/project/deepnanomod/aoe53features/umr  \n \
-python %(prog)s --wrkBase /mnt/isilon/wang_lab/liuq1/nanopore/nanopolish/sss/160617_ecolilowinput_sssiR9/called/pass --threads 48 --recursive 0 --posneg 1 --outFolder /scr1/users/liuq1/project/deepnanomod/aoe53features/sss \n \
 ", formatter_class=RawTextHelpFormatter)
 parser_getfeatures.add_argument("--posneg", type=int, default=0, choices=[0,1], help="The positive(1) or negative(0) class. Default: 0")
 parser_getfeatures.add_argument("--size_per_batch", type=int, default=7, help="The size (unit: 10^7=10M) of a feature file. Default: 7")
@@ -403,32 +400,6 @@ parser_getfeatures.add_argument("--anymod", type=str, help="The file pattern for
 parser_getfeatures.add_argument("--nomod", type=str, help="The file pattern for any modification: bisultfiteseq/chr20_no1_0.95.txt")
 
 parser_getfeatures.set_defaults(func=mGetFeatures)
-
-
-'''
-parser_getfeaturesE = subparsers.add_parser('getfeaturesE', parents=[parent_parser], help="Get features for all fast5 files", description="Get features for all fast5 files", epilog="For example, \n \
-python %(prog)s --wrkBase /mnt/isilon/wang_lab/liuq1/nanopore/nanopolish/umr/160617_ecolilowinput_UMR9/called/pass --threads 48 --recursive 0 --posneg 0 --outFolder /scr1/users/liuq1/project/deepnanomod/aoe53features/umr  \n \
-python %(prog)s --wrkBase /mnt/isilon/wang_lab/liuq1/nanopore/nanopolish/sss/160617_ecolilowinput_sssiR9/called/pass --threads 48 --recursive 0 --posneg 1 --outFolder /scr1/users/liuq1/project/deepnanomod/aoe53features/sss \n \
-", formatter_class=RawTextHelpFormatter)
-parser_getfeaturesE.add_argument("--posneg", type=int, default=0, choices=[0,1], help="The positive(1) or negative(0) class. Default: 0")
-parser_getfeaturesE.add_argument("--size_per_batch", type=float, default=7, help="The size (unit: 10^8=100M) of a feature file. Default: 7")
-# for uni2feature
-#parser_getfeaturesE.add_argument("--size_per_batch", type=int, default=3, help="The size (unit: 10^7=10M) of a feature file. Default: 7")
-parser_getfeaturesE.add_argument("--fnum", type=int, default=53, help="The number of features. Default: 53")
-parser_getfeaturesE.set_defaults(func=mGetFeaturesE)
-
-
-parser_getNAfeatures= subparsers.add_parser('getNAfeatures', parents=[parent_parser], help="Get features for all fast5 files", description="Get features for all fast5 files", epilog="For example, \n \
-python %(prog)s --wrkBase /scr1/users/liuq1/project/nanopore/nanodeepmod/na12878albacore126/chr7 --threads 30 --recursive 1 --outFolder data_NanoDeepMod/na12878/chr7 --fulmod \"bisultfiteseq/chr7_C*_0.95.txt\" --anymod \"bisultfiteseq/chr7_any_0.95.txt\"  \n \
-python %(prog)s --wrkBase /scr1/users/liuq1/project/nanopore/nanodeepmod/na12878albacore126/chr20 --threads 30 --recursive 1 --outFolder data_NanoDeepMod/na12878/chr20 --fulmod \"bisultfiteseq/chr20_C*_0.95.txt\" --anymod \"bisultfiteseq/chr20_any_0.95.txt\"  \n \
-", formatter_class=RawTextHelpFormatter)
-parser_getNAfeatures.add_argument("--size_per_batch", type=float, default=7, help="The size (unit: 10^8=100M) of a feature file. Default: 7")
-parser_getNAfeatures.add_argument("--fulmod", default='bisultfiteseq/chr20_C*_0.95.txt', help="The file pattern for full modification")
-parser_getNAfeatures.add_argument("--anymod", default="bisultfiteseq/chr20_any_0.95.txt", help="The file pattern for any modification")
-parser_getNAfeatures.add_argument("--nomod", default="bisultfiteseq/chr20_no1_0.95.txt", help="The file pattern for no modification")
-parser_getNAfeatures.add_argument("--fnum", type=int, default=53, help="The number of features. Default: 53")
-parser_getNAfeatures.set_defaults(func=mGetNAfeatures)
-'''
 
 
 if len(sys.argv)<2:
