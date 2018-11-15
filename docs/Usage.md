@@ -11,7 +11,8 @@ python DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolde
 where users need to provide where is the FAST5 files (`--wrkBase`), where is the reference genome (`--Ref`), where is the output folder (`--outFolder`), and also the base of interest and the mod file. Users can optionally specify unique string for the results file names (`--FileID`) and how many threads are used (`--threads`).
 
 If you want to make the prediction for base `A`, the following command could be used.
-```python DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolder out_folder --Base A --modfile train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --FileID User_Uniq_name --threads 4
+```
+python DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolder out_folder --Base A --modfile train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --FileID User_Uniq_name --threads 4
 ```
 
 
