@@ -1,0 +1,6 @@
+model_checkpoint_path: "mod_train_f7_wd21_chr1to10"
+all_model_checkpoint_paths: "../30.6/mod_train_f7_wd21_chr1to10"
+all_model_checkpoint_paths: "../30.7/mod_train_f7_wd21_chr1to10"
+all_model_checkpoint_paths: "../30.8/mod_train_f7_wd21_chr1to10"
+all_model_checkpoint_paths: "../30.9/mod_train_f7_wd21_chr1to10"
+all_model_checkpoint_paths: "mod_train_f7_wd21_chr1to10"

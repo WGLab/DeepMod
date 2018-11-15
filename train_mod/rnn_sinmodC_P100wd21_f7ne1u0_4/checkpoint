@@ -1,0 +1,6 @@
+model_checkpoint_path: "mod_train_sinmodC_P100wd21_f3ne1u0"
+all_model_checkpoint_paths: "../2/mod_train_sinmodC_P100wd21_f3ne1u0"
+all_model_checkpoint_paths: "../2.50/mod_train_sinmodC_P100wd21_f3ne1u0"
+all_model_checkpoint_paths: "../3/mod_train_sinmodC_P100wd21_f3ne1u0"
+all_model_checkpoint_paths: "../3.50/mod_train_sinmodC_P100wd21_f3ne1u0"
+all_model_checkpoint_paths: "mod_train_sinmodC_P100wd21_f3ne1u0"
