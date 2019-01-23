@@ -51,7 +51,10 @@ Users might need to install `tensorflow` by yourself or by using `conda install 
 		+ Run `python bin/DeepMod.py` for help document or 
 		+ Run `python bin/DeepMod.py detect` for the detection help document.
 Users might need to run `source activate mdeepmod` if the virtual environment and required packages are installed with the commands above.
-	
+
+## Installation time
+Without GPU-version tensorflow, it would take ~30 minutes to install required packages and DeepMod. 
+
 ## Usage:
  For how to use them, please refer to [Usage](https://github.com/WGLab/DeepMod/blob/master/docs/Usage.md)
 
