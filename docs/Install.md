@@ -31,7 +31,7 @@ Users might need to install `tensorflow` by yourself or by using `conda install 
 
 ## Install DeepMod:
 	* git clone https://github.com/WGLab/DeepMod
-	* The script to be run is in bin/DeepMod.py: `python bin/DeepMod.py`
+	* The script to be run is in bin/DeepMod.py: `python bin/DeepMod.py` (Users might need to run `source activate mdeepmod` if the virtual environment and required packages are installed with the commands above.)
 	
 ## Usage:
  For how to use them, please refer to [Usage](https://github.com/WGLab/DeepMod/blob/master/docs/Usage.md)
