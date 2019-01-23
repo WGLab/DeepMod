@@ -26,7 +26,27 @@ time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib3/ --Ref ref
 ```
 The three commands might take ~150 minutes, 350 minutes and 500 minutes to be done. After that, you will found the results under the directory of *ecoli_pred* with *--FileID* as the sub-folder name. The results are in the *bed* format with the file names as *mod_pos.NC_000913.3-.C.bed* and *mod_pos.NC_000913.3+.C.bed*. The detail of the methylation prediction for each long read is also provided. 
 
+One can run DeepMod on other datasets with the commands below.
+```
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth8_lib2/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID gCgc --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth9_lib2/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID Cgmpe --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+```
 
+### Example 2
+#### Step 1. datasets
+You need contact the original authors<sup>1</sup> to get the downloading URL.
+
+Please download Nanopore sequencing data for *con1*, *con2* and *gAtc* motif, *tcgA* and *gaAttc*, and untar them into seperate sub-folder under the *data* directory, and assumed their sub-folder names are *Control_lib1*， *Control_lib3*, *meth11_lib3*, *meth1_lib1* and *meth4_lib1* respectively. If you have run Example 1, you might already have the dataset for *con1* and *con2*.
+
+#### Step 2.
+```
+mkdir ecoli_pred/ (if not exist)
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth11_lib3/ --Ref ref/Ecoli_k12_mg1655.fasta --Base A --FileID gatc --modfile DeepMod/train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth1_lib1/ --Ref ref/Ecoli_k12_mg1655.fasta --Base A --FileID tcga --modfile DeepMod/train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth4_lib1/ --Ref ref/Ecoli_k12_mg1655.fasta --Base A --FileID gaattc --modfile DeepMod/train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib1/ --Ref ref/Ecoli_k12_mg1655.fasta --Base A --FileID con1a --modfile DeepMod/train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib3/ --Ref ref/Ecoli_k12_mg1655.fasta --Base A --FileID con2a --modfile DeepMod/train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+```
 
 
 ## Reference
