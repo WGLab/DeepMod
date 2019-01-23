@@ -27,6 +27,7 @@ Please refer to [Usage](https://github.com/WGLab/DeepMod/blob/master/docs/Usage.
 
 ## Examples and Reproducibility of our analysis.
 
+Please refer to [Examples and Reproducibility](https://github.com/WGLab/DeepMod/blob/master/docs/Reproducibility.md) for examples of how to run DeepMod.
 
 ## Revision History
 
