@@ -8,6 +8,9 @@ DeepMod is a computational tool which takes long-read signals as input and outpu
 
 The input of DeepMod is Nanopore long read data together a refrence genome. 
 
+## Installation
+Please refer to [Usage](https://github.com/WGLab/DeepMod/blob/master/docs/Install.md) for how to install DeepMod.
+
 ## Usage
 
 Please refer to [Usage](https://github.com/WGLab/DeepMod/blob/master/docs/Usage.md) for how to use DeepMod.
