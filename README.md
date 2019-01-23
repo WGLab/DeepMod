@@ -25,7 +25,7 @@ Please refer to [Installation](https://github.com/WGLab/DeepMod/blob/master/docs
 
 Please refer to [Usage](https://github.com/WGLab/DeepMod/blob/master/docs/Usage.md) for how to use DeepMod.
 
-## Examples and reproductibity of our analysis.
+## Examples and Reproducibility of our analysis.
 
 
 ## Revision History
