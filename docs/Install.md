@@ -15,6 +15,7 @@ The following packages are needed to run DeepMod. To efficiently manage the inst
 	* If running performance evaluation, you might need
 		+ python packages: rpy2, matplotlib, scikit-learn
 		+ R packages: ggplot2, gridExtra, plyr, RColorBrewer
+If you use annoconda, the following three commands can install majority of necessary packages (`conda install -c anaconda h5py hdf5 numpy scipy scikit-learn`, `conda install -c bioconda minimap2 bwa samtools`, `conda install -c r rpy2 r-ggplot2 r-gridextra r-plyr r-rcolorbrewer`). But you might need to install tensorflow by yourself.
 
 ## Install:
 	* git clone https://github.com/WGLab/DeepMod
