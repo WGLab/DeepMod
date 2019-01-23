@@ -4,10 +4,14 @@
 	* python packages:
 		+ h5py
 		+ numpy
+		+ scipy
 	* BWA MEM/minimap2
 	* SAMTOOLS
 	* HDF5
 	* Tensorflow
+	* If running performance evaluation, you might need
+		+ python packages: rpy2, matplotlib, scikit-learn
+		+ R packages: ggplot2, gridExtra, plyr, RColorBrewer
 
 ## Install:
 	* git clone https://github.com/WGLab/DeepMod
