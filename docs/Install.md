@@ -1,8 +1,8 @@
 
-## Prerequisites:
-The following packages are needed to run DeepMod. To efficiently manage the installation packages, Anaconda is recommended but users feel free to have their own choices. If Annocoda is used, it is also an good option to use virtual environment in annocoda (such as typing `conda create -n mdeepmod python=2.7 anaconda` to create a virtual environment, and typing `source activate mdeepmod` to activate the virtual environment. After activating `mdeepmod`, and you can install packages and then use DeepMod). `source deactivate` can be used if you want to exit the virtual environment.
+# Installation Guide
 
- ### The required packages are listed below:
+## Prerequisites:
+ ### The required packages for running DeepMod are listed below:
 	* Python 2.7
 	* python packages:
 		+ h5py
@@ -15,9 +15,21 @@ The following packages are needed to run DeepMod. To efficiently manage the inst
 	* If running performance evaluation, you might need
 		+ python packages: rpy2, matplotlib, scikit-learn
 		+ R packages: ggplot2, gridExtra, plyr, RColorBrewer
-If you use annoconda, the following three commands can install majority of necessary packages (`conda install -c anaconda h5py hdf5 numpy scipy scikit-learn`, `conda install -c bioconda minimap2 bwa samtools`, `conda install -c r rpy2 r-ggplot2 r-gridextra r-plyr r-rcolorbrewer`). But you might need to install `tensorflow` by yourself.
+		
+  ### Package installation		
+Users have their own choice of how to install required package above. But to efficiently manage the installation packages, Anaconda is recommended. After installing Annocoda, it would also be an good option to use virtual environment in annocoda. `conda create -n mdeepmod python=2.7 anaconda` can be used to create a virtual environment, and `source activate mdeepmod` can be used to activate the virtual environment, and then install required packages or run DeepMod. If users want to exit the virtual environment, simply type `source deactivate`. 
 
-## Install:
+After creating `mdeepmod` virtual environment using annocoda, the following commands can install majority of necessary packages:
+
+```
+source activate mdeepmod
+conda install -c anaconda h5py hdf5 numpy scipy scikit-learn
+conda install -c bioconda minimap2 bwa samtools
+conda install -c r rpy2 r-ggplot2 r-gridextra r-plyr r-rcolorbrewer
+```
+Users might need to install `tensorflow` by yourself or by using `conda install -c conda-forge tensorflow` (if there are conflicts when using this command, uers need to give up and install `tensorflow` by yourself.).
+
+## Install DeepMod:
 	* git clone https://github.com/WGLab/DeepMod
 	* The script to be run is in bin/DeepMod.py: `python bin/DeepMod.py`
 	
