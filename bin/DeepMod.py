@@ -228,8 +228,8 @@ com_group_for_comparison.add_argument("--FileID", default="mod", help="The uniqu
 com_group_for_comparison.add_argument("--outFolder", default='./mod_output', help="The default folder for outputing the results. Default: ./mod_output")
 com_group_for_comparison.add_argument("--recursive", type=int, default=1, choices=[0,1], help="Recurise to find fast5 files. Default:1")
 com_group_for_comparison.add_argument("--threads", type=int, default=4, help="The number of threads used (not for train). Default:4")
-com_group_for_comparison.add_argument("--files_per_thread", type=int, default=500, help="The number of fast5 files for each thread (not for train). Default:500")
-com_group_for_comparison.add_argument("--windowsize", type=int, default=51, help="The window size to extract features. Default: 51")
+com_group_for_comparison.add_argument("--files_per_thread", type=int, default=1000, help="The number of fast5 files for each thread (not for train). Default:500")
+com_group_for_comparison.add_argument("--windowsize", type=int, default=21, help="The window size to extract features. Default: 51")
 com_group_for_comparison.add_argument("--alignStr", type=str, default='bwa', choices=["bwa","minimap2"], help="Alignment tools (bwa or minimap2 is supported). Default: bwa")
 
 parser_detect = subparsers.add_parser('detect', parents=[parent_parser], help="Detect modifications at a genomic scale", description="Detect modifications by integrating all long reads for a genome", epilog="For example, \n \
@@ -246,7 +246,7 @@ parser_detect.add_argument("--basecall_2strand", default="BaseCalled_template", 
 parser_detect.add_argument("--region", default=None, help="The region of interest: for example, chr:1:100000;chr2:10000");
 parser_detect.add_argument("--ConUnk", default=True, choices=[False, True], help="Whether contain unknown chromosome"); 
 parser_detect.add_argument("--outputlayer", default="", choices=["", "sigmoid"], help="how to put activation function for output layer")
-parser_detect.add_argument("--Base", type=str, choices=['A', 'C', 'G', 'T'], help="Interest of bases");
+parser_detect.add_argument("--Base", type=str, default='C', choices=['A', 'C', 'G', 'T'], help="Interest of bases");
 parser_detect.add_argument("--mod_cluster", default=0, choices=[0,1], help="1: CpG cluster effect; 0: not");
 parser_detect.set_defaults(func=mDetect)
 
