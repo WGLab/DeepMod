@@ -39,6 +39,7 @@ python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/Cgmpe ref/Ecoli_k12_mg1655.f
 python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/Cgsss ref/Ecoli_k12_mg1655.fasta Cg 0  '' -1 -1 ecoli_pred/Cgsss/ ecoli_pred/con1,ecoli_pred/con2
 python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/gCgc ref/Ecoli_k12_mg1655.fasta gCgc 1  '' -1 -1 ecoli_pred/gCgc/ ecoli_pred/con1,ecoli_pred/con2
 ```
+The commands above will generate AP plots and AUC plots under the directory of *ecoli_pred/Cgmpe/*, *ecoli_pred/Cgsss/*, *ecoli_pred/gCgc/* which are performance as shown in Figure 2 (a), (c) and (d).
 
 ### Example 2
 #### Step 1. datasets
@@ -62,6 +63,7 @@ python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/gAtc ref/Ecoli_k12_mg1655.fa
 python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/tcgA ref/Ecoli_k12_mg1655.fasta tcgA 3  '' 1000000 2000000 ecoli_pred/tcgA/ ecoli_pred/con1a,ecoli_pred/con2a
 python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/gaAttc ref/Ecoli_k12_mg1655.fasta gaAttc 2  '' 1000000 2000000 ecoli_pred/gaAttc/ ecoli_pred/con1a,ecoli_pred/con2a
 ```
+The commands above will generate AP plots and AUC plots under the directory of *ecoli_pred/gAtc/*, *ecoli_pred/tcgA/*, *ecoli_pred/gaAttc/* which are performance as shown in Figure 3 (a) and the supplementary Figure 6.
 
 ### Example 3: Detect 5mC on Na12878
 #### Step 1. datasets
