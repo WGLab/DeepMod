@@ -74,6 +74,13 @@ mkdir na12878_pred
 time python DeepMod/bin/DeepMod.py detect --wrkBase data/chr1/tar1 --Ref ref/hg38.fasta --FileID chr1_tar1 --modfile DeepMod/train_mod/rnn_conmodC_P100wd21_f7ne1u0_4/mod_train_conmodC_P100wd21_f3ne1u0 --threads 15 --outFolder na12878_pred/
 ```
 
+#### Step 3.
+Then, the following command can be used to merge all results in Step 2.
+```
+python DeepMod/tools/sum_chr_mod.py na12878_pred/ C na12878_C
+```
+Then, the results will be under the directory of *na12878_pred/* and the result file names start with *na12878_C* and end with '.bed' in a bed format. The results are grouped by chromosomes.
+
 
 ## Reference
 1. Stoiber MH, et al. De novo Identification of DNA Modifications Enabled by Genome-Guided Nanopore Signal Processing. bioRxiv 10.1101/094672,  (2017).
