@@ -13,7 +13,7 @@ Hg38 was used for human Nanopore sequencing data. We assumed the fasta human fil
 
 ## Run on E. coli data
 The Nanopore data set are large, and thus users need to contact the original authors<sup>1</sup> to get the downloading URL. 
-### Example 1
+### Example 1: 5mC detection
 #### Step 1. datasets
 Please download Nanopore sequencing data for *con1*, *con2* and *CG* motif with SSSl, and untar them into seperate sub-folder under the *data* directory, and assumed their sub-folder names are *Control_lib1*， *Control_lib3* and *meth10_lib3* respectively.
 
@@ -41,7 +41,7 @@ python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/gCgc ref/Ecoli_k12_mg1655.fa
 ```
 The commands above will generate AP plots and AUC plots under the directory of *ecoli_pred/Cgmpe/*, *ecoli_pred/Cgsss/*, *ecoli_pred/gCgc/* which are performance as shown in Figure 2 (a), (c) and (d).
 
-### Example 2
+### Example 2: 6mA detection
 #### Step 1. datasets
 You need contact the original authors<sup>1</sup> to get the downloading URL.
 
@@ -65,25 +65,25 @@ python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/gaAttc ref/Ecoli_k12_mg1655.
 ```
 The commands above will generate AP plots and AUC plots under the directory of *ecoli_pred/gAtc/*, *ecoli_pred/tcgA/*, *ecoli_pred/gaAttc/* which are performance as shown in Figure 3 (a) and the supplementary Figure 6.
 
-### Example 3: Detect 5mC on Na12878
-#### Step 1. datasets
+## Example 3: Detect 5mC on Na12878
+### Step 1. datasets
 You might need to [Na12878 Nanopore sequencing data](https://github.com/nanopore-wgs-consortium/NA12878/blob/master/nanopore-human-genome/rel_3_4.md) to download fast5 files. Please note that the whole dataset is ~30TB.
 
-#### Step 2.
+### Step 2.
 Since it is very large for NA12878 Nanopore sequencing data, users can run each of tar files (each chromomsome has 1 to 9 tar files) separately to speed up the detection process. An example of running DeepMod on a template tar file is given below:
 ```
 mkdir na12878_pred
 time python DeepMod/bin/DeepMod.py detect --wrkBase data/chr1/tar1 --Ref ref/hg38.fasta --FileID chr1_tar1 --modfile DeepMod/train_mod/rnn_conmodC_P100wd21_f7ne1u0_4/mod_train_conmodC_P100wd21_f3ne1u0 --threads 15 --outFolder na12878_pred/
 ```
 
-#### Step 3.
+### Step 3.
 Then, the following command can be used to merge all results in Step 2.
 ```
 python DeepMod/tools/sum_chr_mod.py na12878_pred/ C na12878_C
 ```
 Then, the results will be under the directory of *na12878_pred/* and the result file names start with *na12878_C* and end with '.bed' in a bed format. The results are grouped by chromosomes.
 
-#### Step 4 (optional)
+### Step 4 (optional)
 This step is to consder the cluster effect of 5mC in human genome. To do that, a CpG index in a human genome will be generated.
 ```
 python DeepMod/tools/generate_motif_pos.py ref/hg38.fa genome_motif/C C CG 0
@@ -96,7 +96,7 @@ python DeepMod/tools/hm_cluster_predict.py na12878_pred/na12878_C genome_motif/C
 ```
 The script will take all *a12878_pred/na12878_C.chr[12....].C.bed* as input, and output the bed files with the file name format of *a12878_pred/na12878_C_clusterCpG.chr[12....].C.bed*
 
-#### Step 5
+### Step 5
 To evaluate DeepMod's performance on NA12878, users might use bisulfite sequencing results from https://www.encodeproject.org/experiments/ENCSR890UQO/. Due to the heterogeneity of sequenced samples, completely methylated and completely un-methylated bases could be used for the evaluation: a genomic position of a base was considered to be completely methylated if its methylation percentage >=90% in both replicates of bisulfite sequencing with coverage>=c (c could be 1, 5 or 10), and to be completely un-methylated if its methylation percentage is 0% in both replicates. 
 
 The modification detection on HX1 can be run in the similar way to that on NA12878 but with different `--modfile`: *DeepMod/train_mod/rnn_f7_wd21_chr1to10_4/mod_train_f7_wd21_chr1to10*.
