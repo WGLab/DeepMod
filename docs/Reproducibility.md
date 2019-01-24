@@ -63,5 +63,16 @@ python DeepMod/bin/tools/cal_EcoliDetPerf.py ecoli_pred/tcgA ref/Ecoli_k12_mg165
 python DeepMod/bin/tools/cal_EcoliDetPerf.py ecoli_pred/gaAttc ref/Ecoli_k12_mg1655.fasta gaAttc 2  '' 1000000 2000000 ecoli_pred/gaAttc/ ecoli_pred/con1a;ecoli_pred/con2a
 ```
 
+### Example 3: Detect 5mC on Na12878
+#### Step 1. datasets
+You might need to [Na12878 Nanopore sequencing data](https://github.com/nanopore-wgs-consortium/NA12878/blob/master/nanopore-human-genome/rel_3_4.md) to download fast5 files. Please note that the whole dataset is ~30TB.
+
+#### Step 2.
+Since it is very large for NA12878 Nanopore sequencing data, users can run each of tar files (each chromomsome has 1 to 9 tar files) separately to speed up the detection process. An example of running DeepMod on a template tar file is given below:
+```
+mkdir na12878_pred
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib1/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID con1 --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+```
+
 ## Reference
 1. Stoiber MH, et al. De novo Identification of DNA Modifications Enabled by Genome-Guided Nanopore Signal Processing. bioRxiv 10.1101/094672,  (2017).
