@@ -35,9 +35,9 @@ time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth9_lib2/ --Ref ref/E
 #### Step 3.
 The following commands then can be used to calculate average precision and AUC values of DeepMod.
 ```
-python DeepMod/bin/tools/cal_EcoliDetPerf.py ecoli_pred/Cgmpe ref/Ecoli_k12_mg1655.fasta Cg 0  '' -1 -1 ecoli_pred/Cgmpe/ ecoli_pred/con1;ecoli_pred/con2
-python DeepMod/bin/tools/cal_EcoliDetPerf.py ecoli_pred/Cgsss ref/Ecoli_k12_mg1655.fasta Cg 0  '' -1 -1 ecoli_pred/Cgsss/ ecoli_pred/con1;ecoli_pred/con2
-python DeepMod/bin/tools/cal_EcoliDetPerf.py ecoli_pred/gCgc ref/Ecoli_k12_mg1655.fasta gCgc 1  '' -1 -1 ecoli_pred/gCgc/ ecoli_pred/con1;ecoli_pred/con2
+python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/Cgmpe ref/Ecoli_k12_mg1655.fasta Cg 0  '' -1 -1 ecoli_pred/Cgmpe/ ecoli_pred/con1;ecoli_pred/con2
+python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/Cgsss ref/Ecoli_k12_mg1655.fasta Cg 0  '' -1 -1 ecoli_pred/Cgsss/ ecoli_pred/con1;ecoli_pred/con2
+python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/gCgc ref/Ecoli_k12_mg1655.fasta gCgc 1  '' -1 -1 ecoli_pred/gCgc/ ecoli_pred/con1;ecoli_pred/con2
 ```
 
 ### Example 2
@@ -58,9 +58,9 @@ time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib3/ --Ref ref
 #### Step 3.
 The following commands then can be used to calculate average precision and AUC values of DeepMod.
 ```
-python DeepMod/bin/tools/cal_EcoliDetPerf.py ecoli_pred/gAtc ref/Ecoli_k12_mg1655.fasta gAtc 1  '' 1000000 2000000 ecoli_pred/gAtc/ ecoli_pred/con1a;ecoli_pred/con2a
-python DeepMod/bin/tools/cal_EcoliDetPerf.py ecoli_pred/tcgA ref/Ecoli_k12_mg1655.fasta tcgA 3  '' 1000000 2000000 ecoli_pred/tcgA/ ecoli_pred/con1a;ecoli_pred/con2a
-python DeepMod/bin/tools/cal_EcoliDetPerf.py ecoli_pred/gaAttc ref/Ecoli_k12_mg1655.fasta gaAttc 2  '' 1000000 2000000 ecoli_pred/gaAttc/ ecoli_pred/con1a;ecoli_pred/con2a
+python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/gAtc ref/Ecoli_k12_mg1655.fasta gAtc 1  '' 1000000 2000000 ecoli_pred/gAtc/ ecoli_pred/con1a;ecoli_pred/con2a
+python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/tcgA ref/Ecoli_k12_mg1655.fasta tcgA 3  '' 1000000 2000000 ecoli_pred/tcgA/ ecoli_pred/con1a;ecoli_pred/con2a
+python DeepMod/tools/cal_EcoliDetPerf.py ecoli_pred/gaAttc ref/Ecoli_k12_mg1655.fasta gaAttc 2  '' 1000000 2000000 ecoli_pred/gaAttc/ ecoli_pred/con1a;ecoli_pred/con2a
 ```
 
 ### Example 3: Detect 5mC on Na12878
@@ -71,8 +71,9 @@ You might need to [Na12878 Nanopore sequencing data](https://github.com/nanopore
 Since it is very large for NA12878 Nanopore sequencing data, users can run each of tar files (each chromomsome has 1 to 9 tar files) separately to speed up the detection process. An example of running DeepMod on a template tar file is given below:
 ```
 mkdir na12878_pred
-time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib1/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID con1 --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/chr1/tar1 --Ref ref/hg38.fasta --FileID chr1_tar1 --modfile DeepMod/train_mod/rnn_conmodC_P100wd21_f7ne1u0_4/mod_train_conmodC_P100wd21_f3ne1u0 --threads 15 --outFolder na12878_pred/
 ```
+
 
 ## Reference
 1. Stoiber MH, et al. De novo Identification of DNA Modifications Enabled by Genome-Guided Nanopore Signal Processing. bioRxiv 10.1101/094672,  (2017).
