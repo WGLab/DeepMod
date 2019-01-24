@@ -96,6 +96,8 @@ python DeepMod/tools/hm_cluster_predict.py na12878_pred/na12878_C genome_motif/C
 ```
 The script will take all *a12878_pred/na12878_C.chr[12....].C.bed* as input, and output the bed files with the file name format of *a12878_pred/na12878_C_clusterCpG.chr[12....].C.bed*
 
+#### Step 5
+To evaluate DeepMod's performance on NA12878, users might use bisulfite sequencing results from https://www.encodeproject.org/experiments/ENCSR890UQO/. Due to the heterogeneity of sequenced samples, completely methylated and completely un-methylated bases could be used for the evaluation: a genomic position of a base was considered to be completely methylated if its methylation percentage >=90% in both replicates of bisulfite sequencing with coverage>=c (c could be 1, 5 or 10), and to be completely un-methylated if its methylation percentage is 0% in both replicates. 
 
 The modification detection on HX1 can be run in the similar way to that on NA12878 but with different `--modfile`: *DeepMod/train_mod/rnn_f7_wd21_chr1to10_4/mod_train_f7_wd21_chr1to10*.
 
