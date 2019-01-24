@@ -27,6 +27,13 @@ python DeepMod/tools/sum_chr_mod.py outFolder base-of-interest res-unique-filena
 The last parameter is optional if running on human genome; otherwise, the chromosomes should be provided by a string where chromosome names are seperated by ',' without 'chr'
 
 # 3. How to consider modification cluster effect.
+5mC in CpG motifs has cluster effect in human genome. To consider cluster effect, a second deep learning process was designed to improve the 5mC detection performance. To do that, additional commands below are used
+
+## Output C in CpG motifs in a genome
+```
+python DeepMod/tools/generate_motif_pos.py ref-genome result-folder C CG 0
+```
+The result files were generated under the directory of *result-folder*.
 
 
 
