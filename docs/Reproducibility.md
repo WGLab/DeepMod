@@ -97,7 +97,7 @@ python DeepMod/tools/hm_cluster_predict.py na12878_pred/na12878_C genome_motif/C
 The script will take all *a12878_pred/na12878_C.chr[12....].C.bed* as input, and output the bed files with the file name format of *a12878_pred/na12878_C_clusterCpG.chr[12....].C.bed*
 
 
-The modification detection on HX1 can be run in the similar way to that on NA12878.
+The modification detection on HX1 can be run in the similar way to that on NA12878 but with different `--modfile`: *DeepMod/train_mod/rnn_f7_wd21_chr1to10_4/mod_train_f7_wd21_chr1to10*.
 
 ## Reference
 1. Stoiber MH, et al. De novo Identification of DNA Modifications Enabled by Genome-Guided Nanopore Signal Processing. bioRxiv 10.1101/094672,  (2017).
