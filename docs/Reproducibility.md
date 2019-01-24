@@ -32,6 +32,14 @@ time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth8_lib2/ --Ref ref/E
 time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth9_lib2/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID Cgmpe --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
 ```
 
+#### Step 3.
+The following commands then can be used to calculate average precision and AUC values of DeepMod.
+```
+python DeepMod/bin/cal_EcoliDetPerf.py ecoli_pred/Cgmpe ref/Ecoli_k12_mg1655.fasta Cg 0  '' -1 -1 ecoli_pred/Cgmpe/ ecoli_pred/con1;ecoli_pred/con2
+python DeepMod/bin/cal_EcoliDetPerf.py ecoli_pred/Cgsss ref/Ecoli_k12_mg1655.fasta Cg 0  '' -1 -1 ecoli_pred/Cgsss/ ecoli_pred/con1;ecoli_pred/con2
+python DeepMod/bin/cal_EcoliDetPerf.py ecoli_pred/gCgc ref/Ecoli_k12_mg1655.fasta gCgc 1  '' -1 -1 ecoli_pred/gCgc/ ecoli_pred/con1;ecoli_pred/con2
+```
+
 ### Example 2
 #### Step 1. datasets
 You need contact the original authors<sup>1</sup> to get the downloading URL.
@@ -47,7 +55,13 @@ time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth4_lib1/ --Ref ref/E
 time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib1/ --Ref ref/Ecoli_k12_mg1655.fasta --Base A --FileID con1a --modfile DeepMod/train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
 time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib3/ --Ref ref/Ecoli_k12_mg1655.fasta --Base A --FileID con2a --modfile DeepMod/train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
 ```
-
+#### Step 3.
+The following commands then can be used to calculate average precision and AUC values of DeepMod.
+```
+python DeepMod/bin/cal_EcoliDetPerf.py ecoli_pred/gAtc ref/Ecoli_k12_mg1655.fasta gAtc 1  '' 1000000 2000000 ecoli_pred/gAtc/ ecoli_pred/con1a;ecoli_pred/con2a
+python DeepMod/bin/cal_EcoliDetPerf.py ecoli_pred/tcgA ref/Ecoli_k12_mg1655.fasta tcgA 3  '' 1000000 2000000 ecoli_pred/tcgA/ ecoli_pred/con1a;ecoli_pred/con2a
+python DeepMod/bin/cal_EcoliDetPerf.py ecoli_pred/gaAttc ref/Ecoli_k12_mg1655.fasta gaAttc 2  '' 1000000 2000000 ecoli_pred/gaAttc/ ecoli_pred/con1a;ecoli_pred/con2a
+```
 
 ## Reference
 1. Stoiber MH, et al. De novo Identification of DNA Modifications Enabled by Genome-Guided Nanopore Signal Processing. bioRxiv 10.1101/094672,  (2017).
