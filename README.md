@@ -11,7 +11,7 @@ The input of DeepMod is Nanopore long read data together a refrence genome.
 ## System Requirements
 ### Hardware requirements
 DeepMod is based on deep learning framework, and needs to access raw data of Nanopore sequencing. Thus, it needs enough RAM to support deep learning framework and enough hard drive for raw data of Nanopore sequencing. GPU can substantially speedup the detection process. For optimal performance, we recommend a computer with:
- * RAM: 16+ GB
+ * RAM: 16+ GB per thread
  * GPU or CPU with 8+ cores
  * HDD or better with SSD. Dependent on how large raw data is (for 30X E coli data, it might need 10+GB, while for 30X human data, it might need 10+TB)
  
