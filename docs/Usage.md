@@ -9,18 +9,22 @@ DeepMod has a functional module called "detect" which will detect a specific mod
 The command for modification detection is to run `python DeepMod.py detect`. Without any other parameters, the help document will be shown. An example of how to use it is given below.
 
 ```
-python DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolder out_folder --Base C --modfile train_mod/rnn_f7_wd21_chr1to10_4/mod_train_f7_wd21_chr1to10 --FileID User_Uniq_name --threads 4
+python DeepMod/bin/DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolder out_folder --Base C --modfile train_mod/rnn_f7_wd21_chr1to10_4/mod_train_f7_wd21_chr1to10 --FileID User_Uniq_name --threads 4
 ```
 where users need to provide where is the FAST5 files (`--wrkBase`), where is the reference genome (`--Ref`), where is the output folder (`--outFolder`), and also the base of interest and the mod file. Users can optionally specify unique string for the results file names (`--FileID`) and how many threads are used (`--threads`).
 
 If you want to make the prediction for base `A`, the following command could be used.
 ```
-python DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolder out_folder --Base A --modfile train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --FileID User_Uniq_name --threads 4
+python DeepMod/bin/DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolder out_folder --Base A --modfile train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --FileID User_Uniq_name --threads 4
 ```
 
 
 # 2. How to merge different runs of modification detection
-
+Some projects might generate very large Nanopore sequencing data. For example, [NA12878 Nanopore sequencing data](https://github.com/nanopore-wgs-consortium/NA12878/blob/master/nanopore-human-genome/rel_3_4.md) was ~30TB. To speed up the detection of modification, users can run DeepMod with different `--FileID` and folders where fast5 files are (`--wrkBase`) but the same output folder (`--outFolder`). Then, the following script can be used to merge modification detection grouped by chromosomes for human genome.
+```
+python DeepMod/tools/sum_chr_mod.py outFolder base-of-interest res-unique-filename chromosomes
+```
+The last parameter is optional if running on human genome; otherwise, the chromosomes should be provided by a string where chromosome names are seperated by ',' without 'chr'
 
 # 3. How to consider modification cluster effect.
 
