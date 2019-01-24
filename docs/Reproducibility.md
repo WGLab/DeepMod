@@ -81,6 +81,19 @@ python DeepMod/tools/sum_chr_mod.py na12878_pred/ C na12878_C
 ```
 Then, the results will be under the directory of *na12878_pred/* and the result file names start with *na12878_C* and end with '.bed' in a bed format. The results are grouped by chromosomes.
 
+#### Step 4 (optional)
+This step is to consder the cluster effect of 5mC in human genome. To do that, a CpG index in a human genome will be generated.
+```
+python DeepMod/tools/generate_motif_pos.py ref/hg38.fa genome_motif/C C CG 0
+```
+The results are under the directory of *genome_motif/C*.
+
+After that, a second deep learning process will be used to consider cluster effect.
+```
+```
+
+
+The modification detection on HX1 can be run in the similar way to that on NA12878.
 
 ## Reference
 1. Stoiber MH, et al. De novo Identification of DNA Modifications Enabled by Genome-Guided Nanopore Signal Processing. bioRxiv 10.1101/094672,  (2017).
