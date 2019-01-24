@@ -43,7 +43,7 @@ conda install -c anaconda h5py hdf5 numpy scipy scikit-learn
 conda install -c bioconda minimap2 bwa samtools
 conda install -c r rpy2 r-ggplot2 r-gridextra r-plyr r-rcolorbrewer
 ```
-Users might need to install `tensorflow` by yourself or by using `conda install -c conda-forge tensorflow` (if there are conflicts when using this command, uers need to give up and install `tensorflow` by yourself.).
+Users might need to install `tensorflow` by yourself or by using `conda install -c conda-forge tensorflow matplotlib` (if there are conflicts when using this command, uers need to give up and install `tensorflow` and `matplotlib` by yourself.).
 
 ## Install DeepMod:
 	* git clone https://github.com/WGLab/DeepMod
