@@ -3,7 +3,7 @@
 
 ## Prerequisites:
  ### The required packages for running DeepMod are listed below:
-	* Python 2.7
+	* Python 3.6
 	* python packages:
 		+ h5py
 		+ numpy
@@ -33,7 +33,7 @@ r                         3.4.2
 ```
 
   ### Package installation		
-Users have their own choice of how to install required package above. But to efficiently manage the installation packages, Anaconda is recommended. After installing Annocoda, it would also be an good option to use virtual environment in annocoda. `conda create -n mdeepmod python=2.7 anaconda` can be used to create a virtual environment, and `source activate mdeepmod` can be used to activate the virtual environment, and then install required packages or run DeepMod. If users want to exit the virtual environment, simply type `source deactivate`. 
+Users have their own choice of how to install required package above. But to efficiently manage the installation packages, Anaconda is recommended. After installing Annocoda, it would also be an good option to use virtual environment in annocoda. `conda create -n mdeepmod python=3.6` can be used to create a virtual environment, and `source activate mdeepmod` can be used to activate the virtual environment, and then install required packages or run DeepMod. If users want to exit the virtual environment, simply type `source deactivate`. 
 
 After creating `mdeepmod` virtual environment using annocoda, the following commands can install majority of necessary packages:
 
