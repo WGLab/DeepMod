@@ -90,7 +90,9 @@ The results are under the directory of *genome_motif/C*.
 
 After that, a second deep learning process will be used to consider cluster effect.
 ```
+python DeepMod/tools/hm_cluster_predict.py na12878_pred/na12878_C genome_motif/C
 ```
+The script will take all *a12878_pred/na12878_C.chr[12....].C.bed* as input, and output the bed files with the file name format of *a12878_pred/na12878_C_clusterCpG.chr[12....].C.bed*
 
 
 The modification detection on HX1 can be run in the similar way to that on NA12878.
