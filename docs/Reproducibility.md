@@ -20,7 +20,7 @@ Please download Nanopore sequencing data for *con1*, *con2* and *CG* motif with 
 #### Step 2.
 ```
 mkdir ecoli_pred/
-time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth10_lib3/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID cgsss --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
+time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth10_lib3/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID Cgsss --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
 time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib1/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID con1 --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
 time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib3/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID con2 --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
 ```
