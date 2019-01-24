@@ -35,5 +35,9 @@ python DeepMod/tools/generate_motif_pos.py ref-genome result-folder C CG 0
 ```
 The result files were generated under the directory of *result-folder*.
 
-
+### Generated clustered results.
+```
+python DeepMod/tools/hm_cluster_predict.py prefix-merged-bed-files genome_motif_folder-in-last-step
+```
+The output files will be under the same directory of *prefix-merged-bed-files* but with the prefix of *prefix-merged-bed-files* by appending "_clusterCpG".
 
