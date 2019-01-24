@@ -24,7 +24,7 @@ time python DeepMod/bin/DeepMod.py detect --wrkBase data/meth10_lib3/ --Ref ref/
 time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib1/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID con1 --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
 time python DeepMod/bin/DeepMod.py detect --wrkBase data/Control_lib3/ --Ref ref/Ecoli_k12_mg1655.fasta --FileID con2 --modfile DeepMod/train_mod/rnn_sinmodC_P100wd21_f7ne1u0_4/mod_train_sinmodC_P100wd21_f3ne1u0 --threads 15 --outFolder ecoli_pred/
 ```
-The three commands might take ~150 minutes, 350 minutes and 500 minutes to be done. After that, you will found the results under the directory of *ecoli_pred* with *--FileID* as the sub-folder name. The results are in the *bed* format with the file names as *mod_pos.NC_000913.3-.C.bed* and *mod_pos.NC_000913.3+.C.bed*. The detail of the methylation prediction for each long read is also provided. 
+The three commands might take ~41 minutes, ~84 minutes and ~120 minutes to be done. After that, you will found the results under the directory of *ecoli_pred* with *--FileID* as the sub-folder name. The results are in the *bed* format with the file names as *mod_pos.NC_000913.3-.C.bed* and *mod_pos.NC_000913.3+.C.bed*. The detail of the methylation prediction for each long read is also provided. 
 
 One can run DeepMod on other datasets with the commands below.
 ```
