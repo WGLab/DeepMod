@@ -17,12 +17,17 @@ parser = argparse.ArgumentParser(description="Detect nucleotide modification fro
 ", formatter_class=RawTextHelpFormatter);
 
 
-
+#
+# Return error message when a value<1
+# Return an empty string otherwise
+#
 def non_negative(i, mstr):
    if i<1: return (("\n\tError %d could not be negative(%d)" % (mstr, i)))
    else: return ''
 
-
+#
+# Print all parameters in stdout
+#
 def printParameters(moptions):
    mpkeys = moptions.keys(); #mpkeys.sort()
    sorted(mpkeys)
@@ -31,6 +36,10 @@ def printParameters(moptions):
       print ('%30s: %s' % (mpk, str(moptions[mpk])))
    sys.stdout.flush()
 
+#
+# Got common argument provided by users or default values.
+#
+#
 def mCommonParam(margs):
 
    ErrorMessage = ""
@@ -38,7 +47,11 @@ def mCommonParam(margs):
    moptions['outLevel'] = margs.outLevel
    moptions["wrkBase"] = margs.wrkBase
 
+   # An unique ID for output
+   # Usefull for run the program in parallel
    moptions["FileID"] = margs.FileID
+   # output folder;
+   # make it if the output folder does not exist
    moptions['outFolder'] = margs.outFolder
    moptions['outFolder'] = format_last_letter_of_folder(moptions['outFolder'])
    if moptions['outFolder']==None or (not os.path.isdir(moptions['outFolder'])):
@@ -47,32 +60,46 @@ def mCommonParam(margs):
       except: 
          ErrorMessage = ErrorMessage + ("\n\tThe output folder (%s) does not exist and cannot be created." % moptions['outFolder'])
 
+   # check all data in a recurive way
    moptions['recursive'] = margs.recursive
+   # the number of threads used and the number of files handled by each thread.
    moptions['files_per_thread'] = margs.files_per_thread
    if moptions['files_per_thread']<2: moptions['files_per_thread'] = 2
    moptions['threads'] = margs.threads
    if moptions['threads']<1: moptions['threads'] = 1
 
+   # windowsize: default=21
    moptions['windowsize'] = margs.windowsize
    ErrorMessage = ErrorMessage + non_negative(moptions['windowsize'], 'windowsize')
    if moptions['windowsize']<1: moptions['windowsize'] = 1
 
+   # aligners: bwa-mem or minimap2
    moptions['alignStr'] = margs.alignStr;
 
    return [moptions, ErrorMessage]
 
+#
+# detect modification for bases of interests
+# input is a list of fast5 files, a reference genome and a well-trained model.
+#
 def mDetect(margs):
    moptions, ErrorMessage = mCommonParam(margs)
 
    moptions['basecall_1d'] = margs.basecall_1d
    moptions['basecall_2strand'] = margs.basecall_2strand
+   # Whether consider those chromosome which contain -_:/
+   # default: yes; 
    moptions['ConUnk'] = margs.ConUnk
    moptions['outputlayer'] = margs.outputlayer
    moptions['Base'] = margs.Base
+   # whether take cluster effect of methylation into consideration
    moptions['mod_cluster'] = margs.mod_cluster
+   # base of interest
    if moptions['Base'] in ["", None]:
       ErrorMessage = ErrorMessage + ("\n\t Please provide a base of interest.")
 
+   # predict medification for bases of interest in long reads first
+   # only summarize them for each genomic position of interest .
    moptions['predDet'] = margs.predDet
    if moptions['predDet']:
       moptions['Ref'] = margs.Ref
@@ -90,10 +117,15 @@ def mDetect(margs):
       if (not os.path.isfile(moptions['modfile']+'.meta')):
          ErrorMessage = ErrorMessage + ("\n\tThe meta file (%s) does not exist" % (moptions['modfile']+'.meta' if not moptions['modfile']==None else ""))
    else:
+      # already done the prediction process?
+      # Yes: summarize the results only
       moptions['predpath'] = margs.predpath
       if moptions['predpath']==None or (not os.path.isdir(moptions['predpath'])):
          ErrorMessage = ErrorMessage + ("\n\tThe predpath does not exist")
 
+   # specify region of interest
+   # not consider bases outside regions in a reference genome
+   # None: all bases of interest
    moptions['region'] = [ ]
    if margs.region == None or len(margs.region)==0:
       moptions['region'].append([None, None, None])
@@ -122,18 +154,23 @@ def mDetect(margs):
    from scripts import myDetect
    myDetect.mDetect_manager(moptions)
 
-
+#
+# Train a model
+# Need to get features first.
+#
 def mTrain(margs):
    from scripts import myMultiBiRNN
 
    moptions, ErrorMessage = mCommonParam(margs)
 
+   # network setting
    moptions['fnum'] = margs.fnum
    ErrorMessage = ErrorMessage + non_negative(moptions['fnum'], 'fnum')
    moptions['hidden'] = margs.hidden
    ErrorMessage = ErrorMessage + non_negative(moptions['hidden'], 'hidden')
 
    moptions['outputlayer'] = margs.outputlayer
+   # whether using different class weights
    moptions['unbalanced'] = margs.unbalanced
 
    moptions['modfile'] = margs.modfile
@@ -141,6 +178,9 @@ def mTrain(margs):
    elif (not os.path.isfile(moptions['modfile']+'.meta')):
       ErrorMessage = ErrorMessage + ("\n\tThe meta file (%s) does not exist" % (moptions['modfile']+'.meta' if not moptions['modfile']==None else ""))
 
+   # read-based or region based independent training
+   # E: region-based
+   # P: read-based.
    if not margs.test==None:
       moptions['test'] = margs.test.split(',')
       if moptions['test'][0] == 'E': moptions['test'][0] = '-'
@@ -164,11 +204,17 @@ def mTrain(margs):
 
    myMultiBiRNN.mMult_RNN_LSTM_train(moptions)
 
+#
+# get features for training
+#
+#
 def mGetFeatures(margs):
    from scripts import myGetFeatureBasedPos
 
    moptions, ErrorMessage = mCommonParam(margs)
+   #
    moptions['posneg'] = margs.posneg
+   # the number of features: 7-description or 57-description
    moptions['fnum'] = margs.fnum
    ErrorMessage = ErrorMessage + non_negative(moptions['fnum'], 'fnum')
    moptions['size_per_batch'] = margs.size_per_batch
@@ -185,22 +231,25 @@ def mGetFeatures(margs):
          if not rsp[rv_ind]=='': 
             moptions['region'][rv_ind] = rsp[rv_ind]
 
+   # referene genome
    moptions['Ref'] = margs.Ref
    if moptions['Ref']==None or (not os.path.isfile(moptions['Ref'])):
       ErrorMessage = ErrorMessage + ("\n\t reference file does not exist (%s)" % moptions['Ref'])
 
+   # get motif-based modification
+   # or specify by --fulmod/--anymod/--nomod
    moptions['motifORPos'] = margs.motifORPos
    if margs.motifORPos==1:
       moptions['motif'] = [margs.motif.upper(), margs.ModinMotif]
    elif margs.motifORPos==2:
       moptions['fulmod'] = margs.fulmod
-      if moptions['fulmod']==None:
+      if moptions['fulmod']==None: # completely modificated positions
          ErrorMessage = ErrorMessage + ("\t There is no parameter for --fulmod.")
       moptions['anymod'] = margs.anymod
-      if moptions['anymod'] == None:
+      if moptions['anymod'] == None: # patially modificated positions
          ErrorMessage = ErrorMessage + ("\t There is no parameter for --anymod.")
       moptions['nomod'] = margs.nomod
-      if moptions['nomod'] == None:
+      if moptions['nomod'] == None: # completely unmodified posisionts
          ErrorMessage = ErrorMessage + ("\t There is no parameter for --nomod.")
    else:
       ErrorMessage = ErrorMessage + ("\tmotifORPos value (%d) is not supported." % margs.motifORPos)
@@ -221,6 +270,7 @@ def mGetFeatures(margs):
 subparsers = parser.add_subparsers()
 parent_parser = argparse.ArgumentParser(add_help=False)
 
+# add common options
 com_group_for_comparison = parent_parser.add_argument_group('Common options.')
 com_group_for_comparison.add_argument("--outLevel", type=int, choices=[OUTPUT_DEBUG, OUTPUT_INFO, OUTPUT_WARNING, OUTPUT_ERROR], default=OUTPUT_WARNING, help=("The level for output: %d for DEBUG, %d for INFO, %d for WARNING, %d for ERROR. Default: %d" % (OUTPUT_DEBUG, OUTPUT_INFO, OUTPUT_WARNING, OUTPUT_ERROR, OUTPUT_WARNING)))
 com_group_for_comparison.add_argument("--wrkBase", help="The base folder for FAST5 files.")
@@ -232,6 +282,7 @@ com_group_for_comparison.add_argument("--files_per_thread", type=int, default=10
 com_group_for_comparison.add_argument("--windowsize", type=int, default=21, help="The window size to extract features. Default: 51")
 com_group_for_comparison.add_argument("--alignStr", type=str, default='bwa', choices=["bwa","minimap2"], help="Alignment tools (bwa or minimap2 is supported). Default: bwa")
 
+# add detection options
 parser_detect = subparsers.add_parser('detect', parents=[parent_parser], help="Detect modifications at a genomic scale", description="Detect modifications by integrating all long reads for a genome", epilog="For example, \n \
 python %(prog)s --wrkBase ctrl_oligo_SpeI_cut --FileID mod_det --outFolder ./mod_output/detect3 \n \
 ", formatter_class=RawTextHelpFormatter)
@@ -250,7 +301,7 @@ parser_detect.add_argument("--Base", type=str, default='C', choices=['A', 'C', '
 parser_detect.add_argument("--mod_cluster", default=0, choices=[0,1], help="1: CpG cluster effect; 0: not");
 parser_detect.set_defaults(func=mDetect)
 
-
+# add training options
 parser_training = subparsers.add_parser('train', parents=[parent_parser], help="Training a modification classifier", description="Training a modification classifier", epilog="For example, \n \
 python %(prog)s --wrkBase umr --wrkBase2 sss --FileID mod_train --outFolder ./mod_output/train1 \n \
 ", formatter_class=RawTextHelpFormatter)
@@ -263,6 +314,7 @@ parser_training.add_argument("--outputlayer", default="", choices=["", "sigmoid"
 parser_training.add_argument("--unbalanced", type=int, default=0, choices=[1, 0, None], help="Whether data is unbalanced");
 parser_training.set_defaults(func=mTrain)
 
+# add get-feature options
 parser_getfeatures = subparsers.add_parser('getfeatures', parents=[parent_parser], help="Get features for all fast5 files", description="Get features for all fast5 files", epilog="For example, \n \
 python %(prog)s --wrkBase umr/160617_ecolilowinput_UMR9/called/pass --threads 48 --recursive 0 --posneg 0 --outFolder umr  \n \
 python %(prog)s --wrkBase sss/160617_ecolilowinput_sssiR9/called/pass --threads 48 --recursive 0 --posneg 1 --outFolder sss \n \
@@ -286,7 +338,8 @@ parser_getfeatures.add_argument("--nomod", type=str, help="The file pattern for 
 
 parser_getfeatures.set_defaults(func=mGetFeatures)
 
-
+# no provided argument
+# print help document
 if len(sys.argv)<2:
    parser.print_help();
 else:
