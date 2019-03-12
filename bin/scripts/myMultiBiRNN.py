@@ -12,7 +12,6 @@ from collections import defaultdict
 
 batchsize = 2048;
 
-class_weights = tf.constant([0.9,0.1])
 class_weights = tf.constant([0.1,0.9])
 
 def mCreateSession(num_input, num_hidden, timesteps, moptions):
@@ -75,7 +74,7 @@ def mCreateSession(num_input, num_hidden, timesteps, moptions):
 
 def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
    training_steps = 4
-   training_steps = 40
+   #training_steps = 40
 
    init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred = mCreateSession(num_input, mhidden, timesteps, moptions)
 
@@ -95,12 +94,8 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
       config.gpu_options.per_process_gpu_memory_fraction = 0.5
    else: config.gpu_options.allow_growth = True
    with tf.Session(config=config) as sess:
-      if 'modfile' in moptions and (not moptions['modfile']==None) and len(moptions['modfile'])==2:
-         new_saver = tf.train.import_meta_graph(moptions['modfile'][0]+'.meta')
-         new_saver.restore(sess,tf.train.latest_checkpoint(moptions['modfile'][1])) 
-      else:
-         sess.run(init);
-         sess.run(init_l) 
+      sess.run(init);
+      sess.run(init_l) 
       start_time = time.time(); start_c_time = time.time();
       io_time = 0;
 
@@ -334,25 +329,23 @@ def mPred(mfbase, mffolder, accuracy, X, Y, test_gzfile2, pf, num_input, auc_op,
       pfwriter = open(pf, 'w');
       for test_gzfile in test_gzfile2:
          for test_fn_ind in range(len(test_gzfile)):
-            singlefeatfiledict = getGZFilePos(test_gzfile[test_fn_ind])
-            test_gzfeature, test_gzlabel, file_to_pos_dict = getDataFromFile(test_gzfile[test_fn_ind], moptions) if is_new==0 else getDataFromFile_new(test_gzfile[test_fn_ind], moptions, singlefeatfiledict)
+            test_gzfeature, test_gzlabel, _ = getDataFromFile_new(test_gzfile[test_fn_ind], moptions)
+            if len(test_gzfeature)<1: continue;
 
-            if len(test_gzlabel)==0: continue;
-            detailwriter = open(test_gzfile[test_fn_ind]+'.pred', 'w')
-            file_to_pos_dict_keys = sorted(list(file_to_pos_dict.keys()))
-            for test_file in file_to_pos_dict_keys: 
-               test_feature = test_gzfeature[file_to_pos_dict[test_file][0]:file_to_pos_dict[test_file][1]]
-               test_label   = test_gzlabel[file_to_pos_dict[test_file][0]:file_to_pos_dict[test_file][1]]
-
+            ftlist = np.array_split(test_gzfeature, int(len(test_gzfeature)/batchsize)+1)
+            lblist = np.array_split(test_gzlabel, int(len(test_gzlabel)/batchsize)+1)
+            for fti in range(len(ftlist)):
                sess.run(init_l)
-               testacc, p,r,aucm, mfpred_output = sess.run([accuracy, mpre[1], mspf[1], auc_op[1], mfpred], feed_dict={X:test_feature, Y:test_label})
-               print("Testing accuracy=" + "{:.3f}".format(testacc)+", p=" + "{:.3f}".format(p)+", r=" + "{:.3f}".format(r)+", auc=" + "{:.3f}".format(aucm))
-               pfwriter.write(('%.3f %.3f %.3f %.3f %s\n' % (testacc, p, r, aucm, test_file)))
-               sys.stdout.flush()
-               
-               detailwriter.write(test_file+' '+str(len(test_feature))+' '+''.join(list(map(str, mfpred_output)))+'\n')
-               detailwriter.flush()
-            detailwriter.close()
+               mfpred_output = sess.run([ mfpred], feed_dict={X:ftlist[fti], Y:lblist[fti]})
+               tp, fp, fn, tn = 0, 0, 0, 0
+               for pi in range(len(mfpred_output[0])):
+                  if mfpred_output[0][pi]==1:
+                     if lblist[fti][pi][1]==1: tp += 1
+                     else: fp += 1
+                  else:
+                     if lblist[fti][pi][1]==1: fn += 1
+                     else: tn += 1
+               pfwriter.write('tp=%d fp=%d fn=%d tn=%d %s\n' % (tp, fp, fn, tn, test_gzfile[test_fn_ind]))
             pfwriter.flush()
       pfwriter.close();
 
@@ -394,7 +387,7 @@ def mMult_RNN_LSTM_train(moptions):
 
 def pred_entry(moptions):
 
-   tfiles = getTFiles(moptions['wrkBase'], None, moptions)
+   tfiles = [getTFiles1(moptions['wrkBase'], moptions)]
 
    init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred = mCreateSession(moptions['fnum'], moptions['hidden'], moptions['windowsize'], moptions)
 
