@@ -12,20 +12,30 @@ from collections import defaultdict
 
 batchsize = 2048;
 
+# different class weights for unbalanced data
 class_weights = tf.constant([0.1,0.9])
 
+#
+# create a RNN with LSTM
+# define performance evaluation operation
+#
 def mCreateSession(num_input, num_hidden, timesteps, moptions):
+   # two classes only
    num_classes = 2;
+   # the number of layers
    numlayers = 3;
-
+   # learning rate
    learning_rate = 0.001
 
+   # define input and output
    X = tf.placeholder("float", [None, timesteps, num_input]);
    Y = tf.placeholder("float", [None, num_classes]);
 
+   # for last layers
    weights = {'out': tf.Variable(tf.truncated_normal([2*num_hidden, num_classes]))};
    biases = {'out': tf.Variable(tf.truncated_normal([num_classes]))}
 
+   # define a bidirectional RNN
    def BiRNN(x, weights, biases):
       x = tf.unstack(x, timesteps, 1);
    
@@ -43,12 +53,13 @@ def mCreateSession(num_input, num_hidden, timesteps, moptions):
       else:
          return tf.matmul(outputs[int(timesteps/2)], weights['out']) + biases['out']
 
+   # get prediction
    logits = BiRNN(X, weights, biases);
    prediction = tf.nn.softmax(logits)
 
    mfpred=tf.argmax(prediction,1) 
 
-   ###
+   ## with different class-weights or not
    if 'unbalanced' in moptions and (not moptions['unbalanced']==None) and moptions['unbalanced']==1:  # class_weights
       loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=tf.multiply(logits, class_weights), labels=Y))
    else:
@@ -61,10 +72,14 @@ def mCreateSession(num_input, num_hidden, timesteps, moptions):
    correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1));
    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32));
 
+   # AUC
    auc_op = tf.metrics.auc(Y, prediction)
+   # precision
    mpre = tf.metrics.precision(tf.argmax(Y, 1), tf.argmax(prediction, 1))
+   # recall
    mspf = tf.metrics.recall(tf.argmax(Y, 1), tf.argmax(prediction, 1))
 
+   # initialization of variables
    init = tf.global_variables_initializer();
    init_l = tf.local_variables_initializer()
 
@@ -72,22 +87,22 @@ def mCreateSession(num_input, num_hidden, timesteps, moptions):
    
    return (init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred)
 
+#
+# train a model and save it.
+#
 def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
    training_steps = 4
    #training_steps = 40
 
    init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred = mCreateSession(num_input, mhidden, timesteps, moptions)
 
+   # display step
    desplay_files = len(filelists[0])/100
    if desplay_files<2: desplay_files = 2;
    if desplay_files>10: desplay_files = int(desplay_files/10) * 10; #desplay_files=2
    if desplay_files>100: desplay_files = 100
    file_group_id = [0 for _ in range(len(filelists))];
    sumpsize = 25;
-
-   test_na = True;
-   test_na = False
-   if test_na: desplay_files = 1
 
    config = tf.ConfigProto()
    if (timesteps>61 and num_input>50):
@@ -118,11 +133,6 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
                       if ifl==0: break;
                       else: file_group_id[ifl] = 0
                    batch_2_x, batch_2_y, _ = getDataFromFile_new(filelists[ifl][file_group_id[ifl]], moptions)
-                   if test_na: 
-                      print('<< %d %s %d' % (file_group_id[ifl], filelists[ifl][file_group_id[ifl]], len(batch_2_x)))
-                      if len(batch_2_x)>0:
-                         print (batch_2_x[0])
-                      print()
                    if len(batch_2_y)>0:
                       if len(featurelist[ifl][0])==0:
                          featurelist[ifl][0] = batch_2_x
@@ -198,6 +208,9 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
 
       return (accuracy, X, Y, auc_op, mpre, mspf, init_l, mfpred)
 
+#
+# get all data files in a folder
+# 
 def getTFiles1(folder1, moptions):
    t1files = glob.glob(os.path.join(folder1, "*.xy.gz"))
    if moptions['recursive']==1:
@@ -216,6 +229,9 @@ def getTFiles1(folder1, moptions):
 
    return t1files
 
+#
+# get all data files in two seperate folders
+#
 def getTFiles(folder1, folder2, moptions):
    t1files = glob.glob(os.path.join(folder1, "*.xy.gz")); #print(t1files.__sizeof__(), len(t1files))
    if moptions['recursive']==1:
@@ -249,10 +265,18 @@ def getTFiles(folder1, folder2, moptions):
       print(t2files.__sizeof__(), len(t2files))
       sys.stdout.flush();
    return t1files, t2files
+
+#
+# get data from a data file
+#
 def getDataFromFile(fn, moptions):
    mdata = np.loadtxt(fn, dtype=np.float32)
    t0, ty, tx = np.split(mdata, [0,2], axis=1);
    return (tx, ty, None)
+
+#
+# get X and Y from a data file
+#
 def getDataFromFile_new(fn, moptions, mfind0ld=None):
    mdata = np.loadtxt(fn, dtype=np.float32)
    t0, ty, tx = np.split(mdata, [1,3], axis=1);
@@ -305,7 +329,9 @@ def getDataFromFile_new(fn, moptions, mfind0ld=None):
       return (m_data, m_y, file_to_pos_dict);
    else: return (m_data, m_y, None)
 
-
+#
+# get index information for each fast5 file in a data file
+#
 def getGZFilePos(gzfile):
    mfind = defaultdict()
    with open(gzfile[:-len('.gz')]+'.ind', 'r') as mr:
@@ -318,7 +344,9 @@ def getGZFilePos(gzfile):
           line = mr.readline()
    return mfind
 
-
+#
+# make a prediction for data from a data file
+#
 def mPred(mfbase, mffolder, accuracy, X, Y, test_gzfile2, pf, num_input, auc_op, mpre, mspf, init_l, mfpred, timesteps, moptions):
    config = tf.ConfigProto()
    config.gpu_options.allow_growth = True
@@ -349,9 +377,15 @@ def mPred(mfbase, mffolder, accuracy, X, Y, test_gzfile2, pf, num_input, auc_op,
             pfwriter.flush()
       pfwriter.close();
 
+#
+# entry for prediction
+#
 def pred_prepare(moptions, test_file, accuracy, X, Y, auc_op, mpre, mspf, init_l, mfpred):
     mPred(moptions['modfile'][0], moptions['modfile'][1], accuracy, X, Y, test_file, moptions['outFolder']+moptions['FileID']+'_mpred.txt', moptions['fnum'], auc_op, mpre, mspf, init_l, mfpred, moptions['windowsize'], moptions)
 
+#
+# prepare training process
+#
 def mMult_RNN_LSTM_train(moptions):
 
    filegroups = moptions['wrkBase'].split(';')
@@ -385,6 +419,9 @@ def mMult_RNN_LSTM_train(moptions):
 
    accuracy, X, Y, auc_op, mpre, mspf, init_l, mfpred = train_save_model(filelists, moptions['fnum'], moptions['hidden'], moptions['windowsize'], moptions)
 
+#
+# prepare prediction process
+#
 def pred_entry(moptions):
 
    tfiles = [getTFiles1(moptions['wrkBase'], moptions)]

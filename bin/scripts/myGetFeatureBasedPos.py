@@ -21,6 +21,10 @@ import re;
 from . import myCom
 from . import myDetect
 
+#
+# map long reads
+# then call another function to get feature for each base of interest
+#
 def mGetFeature1(moptions, sp_options, f5files):
    f5data = myDetect.get_Event_Signals(moptions, sp_options, f5files)
 
@@ -90,7 +94,10 @@ def mGetFeature1(moptions, sp_options, f5files):
       end_time = time.time();
       print ("Analyze & annotate & save consuming time %d" % (end_time-start_time))
 
-
+#
+# get mapping information
+# then call another function to get feature of each base in a long read
+#
 def handle_record(moptions, sp_options, sp_param, f5align, f5data):
    alignkeys = list(f5align.keys());
    numreg = re.compile('\d+')
@@ -315,7 +322,9 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
       feat_list = None;
       feat_file_ind += 1
 
-
+#
+# get feature for each base of interest in long reads according to raw signals and mapping information
+#
 def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_clip, end_clip, base_map_info, forward_reverse, rname, mapped_start_pos, num_insertions, num_deletions):
    modevents = sp_param['f5data'][readk][1]
    clnum = 2; binnum = 50; binlen = 0.2;
@@ -329,6 +338,7 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
       mfeatures = np.zeros((len(modevents)-end_clip+100-(start_clip-100), (binnum+3+3+4)));
    else: mfeatures = np.zeros((len(modevents)-end_clip+100-(start_clip-100), (3+3+4)));
 
+   # filter poor alignment
    checkneighbornums = [3,6]
    checkratios = {3:[6,5,4,2], 6:[11,10,9,3]}
    checkratios = {3:[6,5,4,2], 6:[12,10,9,3]}
@@ -480,13 +490,14 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
 
 
 #
-#
+# get the complementary bases
 #
 def get_complement(na):
    if na in myCom.acgt: return myCom.na_bp[na]
    else: return na;
 
 #
+# get required information for reach mapping records.
 #
 def handle_line(moptions, sp_param, f5align):
    lsp = sp_param['line'].split('\t')
@@ -503,7 +514,9 @@ def handle_line(moptions, sp_param, f5align):
 
    return qname
 
-
+#
+# feature handler/workder for multiprocessing 
+#
 def getFeature_handler(moptions, h5files_Q, failed_Q, version_Q):
    while not h5files_Q.empty():
       try:
@@ -523,7 +536,9 @@ def getFeature_handler(moptions, h5files_Q, failed_Q, version_Q):
       for vk in sp_options["get_albacore_version"]:
          version_Q.put((vk, sp_options["get_albacore_version"][vk]))
 
-
+#
+# read sequence information from a reference genome
+#
 def readFA(mfa, t_chr=None):
    fadict = defaultdict();
    with open(mfa, 'r') as mr:
@@ -546,6 +561,9 @@ def readFA(mfa, t_chr=None):
          fadict[cur_chr] = ''.join(fadict[cur_chr])
    return fadict
 
+#
+# get reference positions for motif-based modifications
+#
 def readMotifMod(fadict, mpat='Cg', mposinpat=0, t_chr=None, t_start=None, t_end=None):
    pos_dict = defaultdict(int)
 
@@ -577,7 +595,9 @@ def readMotifMod(fadict, mpat='Cg', mposinpat=0, t_chr=None, t_start=None, t_end
    return (cpgdict, all_a)
 
 
-
+#
+# a multiprocessing manager to get features from all long reads.
+#
 def getFeature_manager(moptions):
    start_time = time.time();
 
@@ -665,7 +685,8 @@ def getFeature_manager(moptions):
       except:
          time.sleep(1);
          continue;
-
+   
+   # output failure information
    if len(failed_files)>0:
       print ('Error information for different fast5 files:')
       for errtype, errfiles in failed_files.items():
