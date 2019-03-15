@@ -5,7 +5,6 @@ from tensorflow.contrib import rnn
 import numpy as np
 
 import math
-
 import glob, os, sys, time;
 
 from collections import defaultdict

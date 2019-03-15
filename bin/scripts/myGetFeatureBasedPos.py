@@ -757,7 +757,7 @@ def getFeature_manager(moptions):
 
    
 
-
+# for indepdent testing of code
 if __name__=='__main__':
 #   if len(sys.argv)>4:
       moptions = {}

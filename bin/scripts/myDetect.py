@@ -1161,6 +1161,7 @@ def mDetect_manager(moptions):
 
    os.system('touch '+moptions['outFolder']+'.done')
 
+# for independent testing of code
 if __name__=='__main__':
 #   if len(sys.argv)>4:
       moptions = {}

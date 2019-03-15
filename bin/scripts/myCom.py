@@ -9,6 +9,7 @@ OUTPUT_ERROR=3;
 
 #
 # base-pairing
+# 4 base types with case insensitive
 #
 na_bp = {"A":"T", \
          "C":"G", \
