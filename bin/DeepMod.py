@@ -50,6 +50,8 @@ def mCommonParam(margs):
    moptions['outLevel'] = margs.outLevel
    # the input working base
    moptions["wrkBase"] = margs.wrkBase
+   if moptions["wrkBase"]==None:
+      ErrorMessage = ErrorMessage + ("\n\tThe input folder is None.")
 
    # An unique ID for output
    # Usefull for run the program in parallel
