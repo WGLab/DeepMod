@@ -45,7 +45,9 @@ def mCommonParam(margs):
 
    ErrorMessage = ""
    moptions = defaultdict()
+   # how to output running message: need more control now.
    moptions['outLevel'] = margs.outLevel
+   # the input working base
    moptions["wrkBase"] = margs.wrkBase
 
    # An unique ID for output
@@ -66,6 +68,7 @@ def mCommonParam(margs):
    # the number of threads used and the number of files handled by each thread.
    moptions['files_per_thread'] = margs.files_per_thread
    if moptions['files_per_thread']<2: moptions['files_per_thread'] = 2
+   # the number of threads used
    moptions['threads'] = margs.threads
    if moptions['threads']<1: moptions['threads'] = 1
 
@@ -84,14 +87,18 @@ def mCommonParam(margs):
 # input is a list of fast5 files, a reference genome and a well-trained model.
 #
 def mDetect(margs):
+   # get common parameters
    moptions, ErrorMessage = mCommonParam(margs)
 
+   # path for basecall information in fast5 files
    moptions['basecall_1d'] = margs.basecall_1d
    moptions['basecall_2strand'] = margs.basecall_2strand
    # Whether consider those chromosome which contain -_:/
    # default: yes; 
    moptions['ConUnk'] = margs.ConUnk
+   # output layer information for deep learning
    moptions['outputlayer'] = margs.outputlayer
+   # base of interest
    moptions['Base'] = margs.Base
    # whether take cluster effect of methylation into consideration
    moptions['mod_cluster'] = margs.mod_cluster
@@ -103,14 +110,18 @@ def mDetect(margs):
    # only summarize them for each genomic position of interest .
    moptions['predDet'] = margs.predDet
    if moptions['predDet']:
+      # path to reference genome
       moptions['Ref'] = margs.Ref
       if moptions['Ref']==None or (not os.path.isfile(moptions['Ref'])):
          ErrorMessage = ErrorMessage + ("\n\t reference file does not exist (%s)" % moptions['Ref'])
 
+      # the number of feature for each event
       moptions['fnum'] = margs.fnum
       ErrorMessage = ErrorMessage + non_negative(moptions['fnum'], 'fnum')
+      # the number of hidden nodes
       moptions['hidden'] = margs.hidden
       ErrorMessage = ErrorMessage + non_negative(moptions['hidden'], 'hidden')
+      # the well-trained model
       moptions['modfile'] = margs.modfile
       if moptions['modfile']==None:
          print("No mod file is provided. The default one is used")
@@ -144,6 +155,7 @@ def mDetect(margs):
    print("\tgive different output names (--FileID) or folders (--outFolder)")
    print("\tA good way for this is to run different chromosome individually.\n")
 
+   # print help information if any necessary options are not provided.
    printParameters(moptions)
    if not ErrorMessage=="":
       ErrorMessage = "Please provide correct parameters" + ErrorMessage
@@ -162,18 +174,21 @@ def mDetect(margs):
 def mTrain(margs):
    from scripts import myMultiBiRNN
 
+   # gent common options
    moptions, ErrorMessage = mCommonParam(margs)
 
-   # network setting
+   # network setting: the number of features and the number of hidden nodes
    moptions['fnum'] = margs.fnum
    ErrorMessage = ErrorMessage + non_negative(moptions['fnum'], 'fnum')
    moptions['hidden'] = margs.hidden
    ErrorMessage = ErrorMessage + non_negative(moptions['hidden'], 'hidden')
 
+   # the output function of the deep learning model
    moptions['outputlayer'] = margs.outputlayer
    # whether using different class weights
    moptions['unbalanced'] = margs.unbalanced
 
+   # re-load trained model and continue to train
    moptions['modfile'] = margs.modfile
    if moptions['modfile']==None: pass;
    elif (not os.path.isfile(moptions['modfile']+'.meta')):
@@ -194,6 +209,7 @@ def mTrain(margs):
       else: moptions['test'][1] = int(moptions['test'][1])/100.0 
    else: moptions['test'] = ['N', '100']
 
+   # print help document if necessary options are not provided.
    print("Train")
    printParameters(moptions)
    if not ErrorMessage=="":
@@ -211,19 +227,23 @@ def mTrain(margs):
 #
 def mGetFeatures(margs):
    from scripts import myGetFeatureBasedPos
-
+   
+   # get common options
    moptions, ErrorMessage = mCommonParam(margs)
-   #
+   # motif-based data: positive or negative control data
    moptions['posneg'] = margs.posneg
    # the number of features: 7-description or 57-description
    moptions['fnum'] = margs.fnum
    ErrorMessage = ErrorMessage + non_negative(moptions['fnum'], 'fnum')
+   # size of each bacth to store features
    moptions['size_per_batch'] = margs.size_per_batch
    if moptions['size_per_batch'] < 0.001: moptions['size_per_batch'] = 0.001
 
+   # path to basecall inform in fast5 files
    moptions['basecall_1d'] = margs.basecall_1d
    moptions['basecall_2strand'] = margs.basecall_2strand
 
+   # regions of interest
    moptions['region'] = [None, None, None]
    if not (margs.region==None or margs.region.strip()==''):
       rsp = margs.region.split(':')
@@ -255,6 +275,7 @@ def mGetFeatures(margs):
    else:
       ErrorMessage = ErrorMessage + ("\tmotifORPos value (%d) is not supported." % margs.motifORPos)
 
+   # print help document if any required options are not provided.
    printParameters(moptions)
    if not ErrorMessage=="":
       ErrorMessage = "Please provide correct parameters" + ErrorMessage
