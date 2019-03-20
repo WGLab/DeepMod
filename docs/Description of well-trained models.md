@@ -1,6 +1,8 @@
 This file contains description of well-trained model in `train_mod` directory.  ***This file is under construction now. Will be done soon.***
 
-# Modificaiton prediction model (LSTM(Long short-term memory)-based RNN (Recurrent neural network))
+# Modificaiton prediction model
+These are trained models of LSTM(Long short-term memory)-based RNN (Recurrent neural network).
+
 ## `rnn_sinmodC_P100wd21_f7ne1u0_4`
 This model is trained on E. Coli data with synthetically introduced 5mC.
 ```
