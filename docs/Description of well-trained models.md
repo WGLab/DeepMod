@@ -1,4 +1,6 @@
-This file contains description of well-trained model in `train_mod` directory. 
+This file contains description of well-trained model in `train_mod` directory. The models are trained on FAST5 files after basecalling. There are two steps: 
+1. run `python bin/DeepMod.py getfeatures` to get features of events first
+2. run `python bin/DeepMod.py train` to train a model with the folders of features generated on the first step.
 
 # 1. Modificaiton prediction model
 These are several trained models of LSTM(Long short-term memory)-based RNN (Recurrent neural network), and their setting is given below.
