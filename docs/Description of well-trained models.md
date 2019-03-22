@@ -1,7 +1,7 @@
-This file contains description of well-trained model in `train_mod` directory.  ***This file is under construction now. Will be done soon.***
+This file contains description of well-trained model in `train_mod` directory. 
 
 # Modificaiton prediction model
-These are trained models of LSTM(Long short-term memory)-based RNN (Recurrent neural network).
+These are several trained models of LSTM(Long short-term memory)-based RNN (Recurrent neural network), and their setting is given below.
 
 ## `rnn_sinmodC_P100wd21_f7ne1u0_4`
 This model is trained on E. Coli data with synthetically introduced 5mC.
@@ -12,6 +12,7 @@ Base of interest: C
 Training epoch of negative data: 4
 Training data: SSS and UMR
 ```
+Please refer to our paper for the meanings of `SSS` and `UMR`.
 
 ## `rnn_conmodC_P100wd21_f7ne1u0_4`
 This model is trained on E. Coli data with synthetically introduced 5mC.
@@ -22,6 +23,7 @@ Base of interest: C
 Training epoch of negative data: 4
 Training data: positive control (SSS, Cg_sssl, Cg_mpel and gCgC), and negative control: (UMR, con1 and con2)
 ```
+Please refer to our paper for the meanings of `SSS`, `UMR`, `con1`, `con2`, `Cg_sssl`, `Cg_mpel` and `gCgC`.
 
 ## `rnn_conmodA_P100wd21_f7ne1u0_4`
 This model is trained on E. Coli data with synthetically introduced 6mA.
@@ -44,7 +46,7 @@ Training data: Three positive control of 6mA and the negative control (con1, con
 ```
 
 ## `rnn_f7_wd21_chr1to10_4`
-This model is trained on Chr 1 to 10 of NA12878 with completely methylated positions (>90% methylation percentage in both replicates of bisulfite sequences) and completely un-methylated positions (<=0% methylation percentage in both replicates of bisulfite sequences). Bases in long reads mapped to the two groups of reference positions are used in training process.
+This model is trained on Chr 1 to 10 of NA12878 with completely methylated positions (>90% methylation percentage in both replicates of bisulfite sequences) and completely un-methylated positions (<=0% methylation percentage in both replicates of bisulfite sequences). Bases in long reads mapped to the two groups of reference positions are used in training process. This model is used to make 5mC prediction on HX1, and both HX1 and NA12878 are basecalled using Albacore v2.3.1.
 ```
 Window size: 21
 Feature/event: 7
@@ -54,7 +56,9 @@ Training data: Chr 1 to 10 of NA12878
 ```
 
 # Cluster-effect model (the second neural network)
+This is the model of the second neural network to consider modificatoin cluster of 5mC. 
 ## `na12878_cluster_train_mod-keep_prob0.7-nb25-chr1`
+The model is only trained on Chr1 of NA12878.
 ```
 Window size: 25
 Feature/event: 11
