@@ -1,6 +1,6 @@
 This file contains description of well-trained model in `train_mod` directory. The models are trained on FAST5 files after basecalling. There are two steps: 
-1. run `python bin/DeepMod.py getfeatures` to get features of events first
-2. run `python bin/DeepMod.py train` to train a model with the folders of features generated on the first step.
+1. run `python bin/DeepMod.py getfeatures` to get features of events first. This function supports both motif-based modification labels (modifications are introduced with motif information) and position-based modification labels (only specified positions are completely methylated/un-methylated). This is for training only. There are no parameters like these in `detect` process.
+2. run `python bin/DeepMod.py train` to train a model with the folders of features generated on the first step. It might take longer time depending on your GPU/CPU power.
 
 # 1. Modificaiton prediction model
 These are several trained models of LSTM(Long short-term memory)-based RNN (Recurrent neural network), and their setting is given below.
