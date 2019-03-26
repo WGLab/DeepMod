@@ -9,6 +9,10 @@ from collections import defaultdict;
 def mprint(mstr):
    print(mstr); sys.stdout.flush()
 
+if len(sys.argv)<4:
+   print ("Usage: python {} pred_folder-of-DeepMod Base-of-interest unique-fileid-in-sum-file [chr-list]".format(sys.argv[0]))
+   print ("       pred_folder-of-DeepMod: the prediction must in its sub-folder.")
+   sys.exit(1)
 
 pred_folder = sys.argv[1]
 baseofint = sys.argv[2]
