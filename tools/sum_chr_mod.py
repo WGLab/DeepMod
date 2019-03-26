@@ -68,8 +68,12 @@ def sum_amod_handler(run_Q):
          break;
 
       allbedfiles = glob.glob(os.path.join(pred_folder, ("*/*/*/*.%s-.%s.bed" % (ck, baseOfin)) ))
+      allbedfiles.extend(glob.glob(os.path.join(pred_folder, ("*/*/*.%s-.%s.bed" % (ck, baseOfin)) )))
+      allbedfiles.extend(glob.glob(os.path.join(pred_folder, ("*/*.%s-.%s.bed" % (ck, baseOfin)) )))
       mprint ("%s - %s: %d" % (ck, baseOfin, len(allbedfiles) )) 
       allbedfiles.extend(glob.glob(os.path.join(pred_folder, ("*/*/*/*.%s+.%s.bed" % (ck, baseOfin)) )))
+      allbedfiles.extend(glob.glob(os.path.join(pred_folder, ("*/*/*.%s+.%s.bed" % (ck, baseOfin)) )))
+      allbedfiles.extend(glob.glob(os.path.join(pred_folder, ("*/*.%s+.%s.bed" % (ck, baseOfin)) )))
       mprint ("%s -+ %s: %d" % (ck, baseOfin, len(allbedfiles) ))
 
       #  0    1     2     3 4 5   6      7      8   9 0 1
