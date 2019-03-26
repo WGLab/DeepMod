@@ -24,7 +24,7 @@ Some projects might generate very large Nanopore sequencing data. For example, [
 ```
 python DeepMod/tools/sum_chr_mod.py outFolder base-of-interest res-unique-filename chromosomes
 ```
-The last parameter is optional if running on human genome; otherwise, the chromosomes should be provided by a string where chromosome names are seperated by ',' without 'chr'
+The last parameter is optional if running on human genome; otherwise, the chromosomes should be provided by a string where chromosome names are seperated by ','. `res-unique-filename` is a unique prefix of the summary file under `outFolder`. `outFolder` is the output folder of `DeepMod` and the prediction of `DeepMod` must be in the sub-folders under `outFolder`. 
 
 # 3. How to consider modification cluster effect.
 5mC in CpG motifs has cluster effect in human genome. To consider cluster effect, a second deep learning process was designed to improve the 5mC detection performance. To do that, additional commands below are used
