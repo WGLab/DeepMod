@@ -16,7 +16,7 @@ sum_fileid = sys.argv[3]
 
 
 if len(sys.argv)>4:
-   chrkeys = ["chr%s" % cid for cid in sys.argv[4].split(',')]
+   chrkeys = ["%s" % cid for cid in sys.argv[4].split(',')]
 else:
    chrkeys = []
    for i in range(1, 23):
