@@ -51,7 +51,7 @@ def mergeMod(g_ad, cur_ad):
        else: g_ad[k] = cur_ad[k]
       
 def save_mod(res_file, amod_dict, baseOfin):
-   poskeys = amod_dict.keys()
+   poskeys = sorted(list(amod_dict.keys()))
    for pk in poskeys:
       if amod_dict[pk][1]==0: del amod_dict[pk]
 
