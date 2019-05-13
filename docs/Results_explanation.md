@@ -1,8 +1,10 @@
 This document describe the fomrat of the output of DeepMod.
 
-1. Check whether the running of DeepMod is successful.
-After finishing the running of DeepMod, usually you will find a "\*.done" file under the output folder. If you cannot see that file, some errors might happen and the running of DeepMod is not successful. One common cause behind this is the memory issue, that is, 
+# 1. Check whether the running of DeepMod is successful.
+After finishing the running of DeepMod, usually you will find a "\*.done" file under the output folder. If you cannot see that file, some errors might happen and the running of DeepMod is not successful. One common cause behind this is the memory issue, that is, DeepMod needs more memory than what you requested or have. Increasing memory generally solve the issue.
 
+# 2 Format of output
+The output is in a BED format like below. The first six columns are `Chr`, `Start pos`, `End pos`, `Base`, `Capped coverage`, and `Strand`, and the last three columns are `Real coverage`, `Mehylation percentage` and `Methylation coverage`.
 
 ```
 chr6 148655 148656 C 10 -  148655 148656 0,0,0 10 10 1
