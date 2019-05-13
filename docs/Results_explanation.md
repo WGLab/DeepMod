@@ -1,5 +1,7 @@
 This document describe the fomrat of the output of DeepMod.
 
+1. Check whether the running of DeepMod is successful.
+After finishing the running of DeepMod, usually you will find a "\*.done" file under the output folder. If you cannot see that file, some errors might happen and the running of DeepMod is not successful. One common cause behind this is the memory issue, that is, 
 
 
 ```
