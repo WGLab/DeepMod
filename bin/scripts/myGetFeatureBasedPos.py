@@ -668,6 +668,7 @@ def getFeature_manager(moptions):
    if moptions['motifORPos']==1: # get motif-based positions for modifications
       moptions['fulmodlist'], moptions['nomodlist'] = readMotifMod(fadict, moptions['motif'][0], moptions['motif'][1], moptions['region'][0], moptions['region'][1], moptions['region'][2])
       moptions['anymodlist'] = None
+      moptions['nomodlist'] = []; # add for simple process
    elif moptions['motifORPos']==2: # modification position is specified by the files
       fuldfiles = glob.glob(moptions["fulmod"]);
       moptions['fulmodlist'] = defaultdict(lambda: defaultdict());
