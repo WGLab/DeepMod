@@ -8,7 +8,9 @@ There are two ways to extract features for next training process. One is motif-b
 ## 1.1 Motif-based process
 For control data, the command below is used for motif-based modification of CpG sites (C is modified) and 10 threads are used.
 ```
-python bin/DeepMod getfeatures --posneg 0 --motif CG --ModinMotif 0 --recursive 1 --threads 10 --Ref m_ref_file --wrkBase fast5-folder_control --FileID m_unique_id-control --outFolder m_output/ctrl_features/
+python bin/DeepMod getfeatures --posneg 0 --motif CG --ModinMotif 0 
+                               --recursive 1 --threads 10 --Ref m_ref_file 
+                               --wrkBase fast5-folder_control --FileID m_unique_id-control --outFolder m_output/ctrl_features/
 ```
 
 For modification data, the command is
