@@ -52,5 +52,11 @@ python bin/DeepMod getfeatures --posneg 1
 
 
 # 2. Model training
-`python bin/DeepMod train `
+The command for training a model is given below
+```
+python bin/DeepMod train --wrkBase feature-folder-list --FileID train-mod-unique-id --outFolder trained-mod-save-folder 
+                         --recursive 1 --windowsize 21
+```
+The trained model will be saved under the `outFolder` with `FileID` as a major part of file name. `wrkBase` is a list of folder of both control data and modification data: the folders of control data and of modification data is separated by ';', and a list folder for control data is separated by ','. For example, `wrkBase feature-folder-ctrl1,feature-folder-ctrl2,feature-folder-ctrl2;feature-folder-mod1,feature-folder-mod2,feature-folder-mod3,feature-folder-mod4`.
+
 
