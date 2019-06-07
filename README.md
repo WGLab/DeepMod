@@ -38,4 +38,5 @@ For release history, please visit [here](https://github.com/WGLab/NanoDeepMod/re
 If you have any questions/issues/bugs, please post them on [GitHub](https://github.com/WGLab/DeepMod/issues). They would also be helpful to other users. 
 
 ## Reference
+**Please cite the publication below if you use our tool:**
 Q. Liu, L. Fang, G. Yu, D. Wang, C. Xiao, K. Wang. Detection of DNA base modifications by deep recurrent neural network on Oxford Nanopore sequencing data. Nat. Commun 10, 2019. Online at https://www.nature.com/articles/s41467-019-10168-2.
