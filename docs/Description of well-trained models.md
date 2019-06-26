@@ -1,4 +1,4 @@
-This file contains description of well-trained model in `train_mod` directory. 
+This file contains description of well-trained model in `train_mod` directory. The meaning of the short name of the data set can be found in the paper. 
 
 # 1. Modificaiton prediction model
 These are several trained models of LSTM(Long short-term memory)-based RNN (Recurrent neural network), and their setting is given below.
