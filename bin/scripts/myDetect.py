@@ -24,7 +24,7 @@ from . import myCom
 import tensorflow as tf
 from tensorflow.contrib import rnn
 from . import myMultiBiRNN
-
+from . import EventTable
 
 rnn_pred_batch_size = 512
 
@@ -213,19 +213,22 @@ def getEvent(moptions, sp_param):
         sp_param['m_event_basecall'] = ''.join([event_model_state[2] for event_model_state in m_event['model_state']]);
         sp_param['left_right_skip'] = (move0_left, len(events_data)-move0_right-1)
      elif sp_param['used_albacore_version']==2:
-        m_event = [];
-        pre_i = 0; pre_length = events_data['length'][pre_i].astype('uint64');
-        for cur_i in range(1, len(events_data)):
-           if events_data['move'][cur_i]>0: # non-stay vents
-              m_event.append( (round(events_data['mean'][pre_i],3), round(events_data['stdv'][pre_i],3), events_data['start'][pre_i], pre_length, events_data['model_state'][pre_i]) )
+        if moptions['SignalGroup']=='simple':
+           m_event = [];
+           pre_i = 0; pre_length = events_data['length'][pre_i].astype('uint64');
+           for cur_i in range(1, len(events_data)):
+              if events_data['move'][cur_i]>0: # non-stay vents
+                 m_event.append( (round(events_data['mean'][pre_i],3), round(events_data['stdv'][pre_i],3), events_data['start'][pre_i], pre_length, events_data['model_state'][pre_i]) )
 
-              pre_i = cur_i; pre_length = events_data['length'][pre_i].astype('uint64');
-           else: # for stay events
-              pre_length += events_data['length'][cur_i].astype('uint64');
-        m_event.append( (round(events_data['mean'][pre_i],3), round(events_data['stdv'][pre_i],3), events_data['start'][pre_i], pre_length, events_data['model_state'][pre_i]) )
+                 pre_i = cur_i; pre_length = events_data['length'][pre_i].astype('uint64');
+              else: # for stay events
+                 pre_length += events_data['length'][cur_i].astype('uint64');
+           m_event.append( (round(events_data['mean'][pre_i],3), round(events_data['stdv'][pre_i],3), events_data['start'][pre_i], pre_length, events_data['model_state'][pre_i]) )
+           # format events
+           m_event = np.array(m_event, dtype=[('mean', '<f4'), ('stdv', '<f4'), ('start', np.uint64), ('length', np.uint64), ('model_state', 'U5')])
+        else:
+           m_event = EventTable.getEvent_Info(moptions, sp_param, events_data)
 
-        # format events
-        m_event = np.array(m_event, dtype=[('mean', '<f4'), ('stdv', '<f4'), ('start', np.uint64), ('length', np.uint64), ('model_state', 'U5')])
         sp_param['m_event'] = m_event
         # get sequence from events
         sp_param['m_event_basecall'] = ''.join([event_model_state[2] for event_model_state in m_event['model_state']]);
@@ -293,6 +296,7 @@ def getFast5Info(moptions, sp_param):
    if sp_param['f5status']=="":
       fq_data = (fq_data.decode(encoding="utf-8")).split('\n')
       sp_param['read_id'] = (fq_data[0][1:] if fq_data[0][0]=='@' else fq_data[0]).replace(" ", ":::").replace("\t", "|||")
+      sp_param['fq_seq'] = fq_data[1];
 
    # get raw signals
    getRawInfo(moptions, sp_param)
