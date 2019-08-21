@@ -306,7 +306,7 @@ com_group_for_comparison.add_argument("--outFolder", default='./mod_output', hel
 com_group_for_comparison.add_argument("--recursive", type=int, default=1, choices=[0,1], help="Recurise to find fast5 files. Default:1")
 com_group_for_comparison.add_argument("--threads", type=int, default=4, help="The number of threads used (not for train). Default:4")
 com_group_for_comparison.add_argument("--files_per_thread", type=int, default=1000, help="The number of fast5 files for each thread (not for train). Default:500")
-com_group_for_comparison.add_argument("--windowsize", type=int, default=21, help="The window size to extract features. Default: 51")
+com_group_for_comparison.add_argument("--windowsize", type=int, default=21, help="The window size to extract features. Default: 21")
 com_group_for_comparison.add_argument("--alignStr", type=str, default='minimap2', choices=["bwa","minimap2"], help="Alignment tools (bwa or minimap2 is supported). Default: minimap2")
 com_group_for_comparison.add_argument("--SignalGroup", type=str, default='simple', choices=["simple","rundif"], help="How to associate signals to each called bases. Default: simple")
 
@@ -357,7 +357,7 @@ parser_getfeatures.add_argument("--basecall_2strand", default="BaseCalled_templa
 parser_getfeatures.add_argument("--motifORPos", type=int, default=1, help="Use Motif (1) or pos (2) for modified bases. Default: 1")
 
 parser_getfeatures.add_argument("--motif", default='CG', type=str, help="The motif of interest")
-parser_getfeatures.add_argument("--ModinMotif", default=0, type=int, help="The motif of interest")
+parser_getfeatures.add_argument("--ModinMotif", default=0, type=int, help="The position of modified base in the motif of interest")
 parser_getfeatures.add_argument("--Ref", help="The reference sequence")
 
 parser_getfeatures.add_argument("--fulmod", type=str, help="The file pattern for full modification: bisultfiteseq/chr20_C*_0.95.txt")
