@@ -63,7 +63,7 @@ def mCommonParam(margs):
    if moptions['outFolder']==None or (not os.path.isdir(moptions['outFolder'])):
       try:
          os.system('mkdir -p '+moptions['outFolder']);
-      except: 
+      except:
          ErrorMessage = ErrorMessage + ("\n\tThe output folder (%s) does not exist and cannot be created." % moptions['outFolder'])
 
    # check all data in a recurive way
@@ -85,6 +85,8 @@ def mCommonParam(margs):
 
    moptions['SignalGroup'] = margs.SignalGroup;
 
+   moptions['move'] = margs.move
+
    return [moptions, ErrorMessage]
 
 #
@@ -99,7 +101,7 @@ def mDetect(margs):
    moptions['basecall_1d'] = margs.basecall_1d
    moptions['basecall_2strand'] = margs.basecall_2strand
    # Whether consider those chromosome which contain -_:/
-   # default: yes; 
+   # default: yes;
    moptions['ConUnk'] = margs.ConUnk
    # output layer information for deep learning
    moptions['outputlayer'] = margs.outputlayer
@@ -168,7 +170,7 @@ def mDetect(margs):
       parser.print_help();
       parser.parse_args(['detect', '--help']);
       sys.exit(1)
-   
+
    from scripts import myDetect
    myDetect.mDetect_manager(moptions)
 
@@ -211,7 +213,7 @@ def mTrain(margs):
       if moptions['test'][0] in ['-']:
          moptions['test'][1] = int(moptions['test'][1]) * (10**6)
          moptions['test'][2] = int(moptions['test'][2]) * (10**6)
-      else: moptions['test'][1] = int(moptions['test'][1])/100.0 
+      else: moptions['test'][1] = int(moptions['test'][1])/100.0
    else: moptions['test'] = ['N', '100']
 
    # print help document if necessary options are not provided.
@@ -232,7 +234,7 @@ def mTrain(margs):
 #
 def mGetFeatures(margs):
    from scripts import myGetFeatureBasedPos
-   
+
    # get common options
    moptions, ErrorMessage = mCommonParam(margs)
    # motif-based data: positive or negative control data
@@ -254,7 +256,7 @@ def mGetFeatures(margs):
       rsp = margs.region.split(':')
       for rv_ind in range(len(rsp)):
          rsp[rv_ind] = rsp[rv_ind].strip();
-         if not rsp[rv_ind]=='': 
+         if not rsp[rv_ind]=='':
             moptions['region'][rv_ind] = rsp[rv_ind]
 
    # referene genome
@@ -309,6 +311,7 @@ com_group_for_comparison.add_argument("--files_per_thread", type=int, default=10
 com_group_for_comparison.add_argument("--windowsize", type=int, default=21, help="The window size to extract features. Default: 51")
 com_group_for_comparison.add_argument("--alignStr", type=str, default='minimap2', choices=["bwa","minimap2"], help="Alignment tools (bwa or minimap2 is supported). Default: minimap2")
 com_group_for_comparison.add_argument("--SignalGroup", type=str, default='simple', choices=["simple","rundif"], help="How to associate signals to each called bases. Default: simple")
+com_group_for_comparison.add_argument("--move", default=False, action="store_true", help="Whether the basecalled data use move tables instead of event tables. Default: False")
 
 # add detection options
 parser_detect = subparsers.add_parser('detect', parents=[parent_parser], help="Detect modifications at a genomic scale", description="Detect modifications by integrating all long reads for a genome", epilog="For example, \n \
@@ -323,7 +326,7 @@ parser_detect.add_argument("--hidden", type=int, default=100, help="The number o
 parser_detect.add_argument("--basecall_1d", default="Basecall_1D_000", help="Path for basecall_1d. Default: Basecall_1D_000")
 parser_detect.add_argument("--basecall_2strand", default="BaseCalled_template", help="Path for basecall_2strand. Default: BaseCalled_template")
 parser_detect.add_argument("--region", default=None, help="The region of interest: for example, chr:1:100000;chr2:10000");
-parser_detect.add_argument("--ConUnk", default=True, choices=[False, True], help="Whether contain unknown chromosome"); 
+parser_detect.add_argument("--ConUnk", default=True, choices=[False, True], help="Whether contain unknown chromosome");
 parser_detect.add_argument("--outputlayer", default="", choices=["", "sigmoid"], help="how to put activation function for output layer")
 parser_detect.add_argument("--Base", type=str, default='C', choices=['A', 'C', 'G', 'T'], help="Interest of bases");
 parser_detect.add_argument("--mod_cluster", default=0, choices=[0,1], help="1: CpG cluster effect; 0: not");
@@ -373,4 +376,3 @@ if len(sys.argv)<2:
 else:
    args = parser.parse_args()
    args.func(args);
-

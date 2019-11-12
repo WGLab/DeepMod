@@ -25,6 +25,7 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 from . import myMultiBiRNN
 from . import EventTable
+from . import MoveTable
 
 rnn_pred_batch_size = 512
 
@@ -63,7 +64,8 @@ def getAlbacoreVersion(moptions, sp_param):
    if not sp_param['f5status']=="": return;
    try:
       ver_path = ''.join([fast5_analysis,'/', moptions['basecall_1d'] ])
-      used_version = LooseVersion(sp_param['f5reader'][ver_path].attrs['version'] if 'version' in sp_param['f5reader'][ver_path].attrs else "0.0")
+      #add .decode("utf-8")  to make it compatible to py3
+      used_version = LooseVersion(sp_param['f5reader'][ver_path].attrs['version'].decode("utf-8")  if 'version' in sp_param['f5reader'][ver_path].attrs else "0.0")
       sp_param['get_albacore_version'] = used_version
       if used_version < LooseVersion("1.0"): #
          sp_param['used_albacore_version'] = 1;
@@ -99,8 +101,8 @@ def get_cur_shift_scale(moptions, sp_param):
    if "kmer_model_dict" not in moptions: return;
 
    event_key = 'm_event'
-  
-   try: 
+
+   try:
       cur_model = np.array([moptions['kmer_model_dict'][c_model_state] for c_model_state in sp_param[event_key]['model_state']], dtype=[('level_mean', np.float), ('level_stdv', np.float)]);
       c_mean_stdv = cur_model['level_mean']*cur_model['level_stdv']
       c_mean_stdv_sum = c_mean_stdv.sum()
@@ -127,6 +129,25 @@ def get_cur_shift_scale(moptions, sp_param):
 #
 def getEvent(moptions, sp_param):
   if not sp_param['f5status']=="": return;
+
+  # If use move tables intead of event tables
+  if moptions['move']:
+      try: # get events from a fast5 file'
+         mv_str = '/'.join(['', 'Analyses', moptions['basecall_1d'], moptions['basecall_2strand'], 'Move'])
+         move_data = sp_param['f5reader'][mv_str][()]
+         sp_param['events_data'] = move_data
+      except:
+         raiseError('No move data', sp_param, "No move data")
+         return;
+      m_event = MoveTable.getMove_Info(moptions, sp_param, move_data)
+      sp_param['m_event'] = m_event
+      # get sequence from events
+      sp_param['m_event_basecall'] = sp_param['fq_seq']
+      sp_param['left_right_skip'] = (0, 0)
+
+
+      return
+ # End the part of getting move tables
 
   try: # get events from a fast5 file
      event_path = ''.join([fast5_analysis, '/', moptions['basecall_1d'], '/', moptions['basecall_2strand'], '/', fast5_events])
@@ -165,9 +186,9 @@ def getEvent(moptions, sp_param):
            first_base_index_in_raw_signal = 0
            if moptions['outLevel']<=myCom.OUTPUT_INFO: print ('Warning!!! first_base_index_in_raw_signal less than 0 ' + sp_param['mfile_path'])
 
-        first_base_index_in_raw_signal = np.uint64(first_base_index_in_raw_signal) 
+        first_base_index_in_raw_signal = np.uint64(first_base_index_in_raw_signal)
 
-        m_event = []; pre_i = move0_left; 
+        m_event = []; pre_i = move0_left;
         cur_length=(events_data['length'][pre_i]*sp_param["channel_info"]["sampling_rate"]).astype('uint64');
         for i in range(move0_left+1, move0_right+1):
            if events_data['move'][i]>0: # for non-stay event
@@ -178,7 +199,7 @@ def getEvent(moptions, sp_param):
                  cal_st = (events_data['start'][pre_i]-events_data['start'][move0_left])*sp_param["channel_info"]["sampling_rate"]+based_ind
                  if cal_st<0: print("Wanging Less than 0")
                  if cal_st>0 and cal_st - (m_event[-1][2]+ m_event[-1][3])>0 and (cal_st - (m_event[-1][2]+ m_event[-1][3])).astype('uint64')>0:
-                    if (cal_st - (m_event[-1][2]+ m_event[-1][3])).astype('uint64')>2: # 
+                    if (cal_st - (m_event[-1][2]+ m_event[-1][3])).astype('uint64')>2: #
                         m_event.append((round(events_data['mean'][pre_i],3), round(events_data['stdv'][pre_i],3), m_event[-1][2]+ m_event[-1][3], (cal_st - (m_event[-1][2]+ m_event[-1][3])).astype('uint64'),  events_data['model_state'][pre_i].upper()))
                         m_event.append((round(events_data['mean'][pre_i],3), round(events_data['stdv'][pre_i],3), cal_st.astype('uint64'), cur_length, events_data['model_state'][pre_i].upper()))
                     else: # for a normal event
@@ -189,11 +210,11 @@ def getEvent(moptions, sp_param):
                     if not convertError:
                        print ('ex: %.7f*%d=%.0f' % (events_data['start'][move0_left].astype(np.float64), sp_param["channel_info"]["sampling_rate"], events_data['start'][move0_left].astype(np.float64)*sp_param["channel_info"]["sampling_rate"])), sp_param['raw_attributes']['start_time'], sp_param['mfile_path'], m_event[-1][2], m_event[-1][3]
                     convertError = True;
-              pre_i = i; 
+              pre_i = i;
               cur_length=(events_data['length'][i]*sp_param["channel_info"]["sampling_rate"]).astype('uint64');
            else: # for stay event
               cur_length += (events_data['length'][i]*sp_param["channel_info"]["sampling_rate"]).astype('uint64')
-        if sp_param['f5status'] == "": # for the last event 
+        if sp_param['f5status'] == "": # for the last event
            # calculated position
            cal_st = (events_data['start'][pre_i]-events_data['start'][move0_left])*sp_param["channel_info"]["sampling_rate"]+based_ind
            if cal_st<0: print("Wanging Less than 0")
@@ -249,7 +270,7 @@ def mnormalized(moptions, sp_param):
    mscale = np.median(np.abs(sp_param['raw_signals'][sp_param['m_event']['start'][0]:(sp_param['m_event']['start'][-1]+sp_param['m_event']['length'][-1])]-mshift));
    # standardize
    sp_param['raw_signals'] = (sp_param['raw_signals'] - mshift)/mscale
-   # get meand 
+   # get meand
    read_med = np.median(sp_param['raw_signals'][sp_param['m_event']['start'][0]:(sp_param['m_event']['start'][-1]+sp_param['m_event']['length'][-1])])
    read_mad = np.median(np.abs(sp_param['raw_signals'][sp_param['m_event']['start'][0]:(sp_param['m_event']['start'][-1]+sp_param['m_event']['length'][-1])] - read_med))
    lower_lim = read_med - (read_mad * 5)
@@ -268,7 +289,7 @@ def getRawInfo(moptions, sp_param):
       for raw_data in sp_param['f5reader'][fast5_rawReads].values(): pass;
       sp_param['raw_attributes'] = dict(raw_data.attrs.items())
 
-      sp_param['raw_signals'] = raw_data['Signal'].value 
+      sp_param['raw_signals'] = raw_data['Signal'][()]
    except:
       raiseError(("No Raw_reads/Signal data %s" % (fast5_rawReads)), sp_param, "No Raw_reads/Signal")
 
@@ -292,26 +313,28 @@ def getFast5Info(moptions, sp_param):
       fq_data = sp_param['f5reader'][fq_path][()]
    except:
       raiseError('No Fastq data', sp_param, "No Fastq data")
-
    if sp_param['f5status']=="":
       fq_data = (fq_data.decode(encoding="utf-8")).split('\n')
       sp_param['read_id'] = (fq_data[0][1:] if fq_data[0][0]=='@' else fq_data[0]).replace(" ", ":::").replace("\t", "|||")
       sp_param['fq_seq'] = fq_data[1];
-
    # get raw signals
    getRawInfo(moptions, sp_param)
    # get events
-   if sp_param['f5status']=="": getEvent(moptions, sp_param)
+   if sp_param['f5status']=="":
+       getEvent(moptions, sp_param)
    # normalize signals.
-   if sp_param['f5status']=="": mnormalized(moptions, sp_param)
+   if sp_param['f5status']=="":
+       mnormalized(moptions, sp_param)
 
    if sp_param['f5status']=="":
-      # get mean, std for each event 
+      # get mean, std for each event
       for i in range(len(sp_param['m_event'])):
          if (len(sp_param['raw_signals'][sp_param['m_event']['start'][i]:sp_param['m_event']['start'][i]+sp_param['m_event']['length'][i]])==0):
             print ('Signal out of range {}: {}-{} {};{} for {}'.format(i, sp_param['m_event']['start'][i], sp_param['m_event']['length'][i], len(sp_param['m_event']), len(sp_param['raw_signals']), sp_param['mfile_path']))
-            if i>500: sp_param['m_event'] = sp_param['m_event'][:i-1]
-            else: sp_param['f5status']=="Less event"
+            if i>500:
+                sp_param['m_event'] = sp_param['m_event'][:i-1]
+            else:
+                sp_param['f5status']=="Less event"
             break;
          sp_param['m_event']['mean'][i] = round(np.mean(sp_param['raw_signals'][sp_param['m_event']['start'][i]:sp_param['m_event']['start'][i]+sp_param['m_event']['length'][i]]), 3)
          sp_param['m_event']['stdv'][i] = round(np.std(sp_param['raw_signals'][sp_param['m_event']['start'][i]:sp_param['m_event']['start'][i]+sp_param['m_event']['length'][i]]), 3)
@@ -334,7 +357,6 @@ def get_Event_Signals(moptions, sp_options, f5files):
             sp_param['mfile_path'] = f5f
             sp_param['f5reader'] = mf5
             sp_param['f5status'] = "";
-            # get associated events of signals
             getFast5Info(moptions, sp_param)
             if 'get_albacore_version' in sp_param:
                sp_options["get_albacore_version"][str(sp_param['get_albacore_version'])] += 1
@@ -344,10 +366,11 @@ def get_Event_Signals(moptions, sp_options, f5files):
                f5data[sp_param['read_id']] = (sp_param['m_event_basecall'], sp_param['m_event'], sp_param['raw_signals'], f5f, sp_param['left_right_skip'])
             else:
                sp_options["Error"][sp_param['f5status']].append(f5f)
-            # for outputing progress 
+            # for outputing progress
             if moptions['outLevel']<=myCom.OUTPUT_DEBUG:
                runnum += 1;
-               if runnum%500==0: 
+
+               if runnum%500==0:
                   end_time = time.time();
                   print ("%d consuming time %d" % (runnum, end_time-start_time))
       except:
@@ -372,11 +395,11 @@ def mDetect1(moptions, sp_options, f5files):
    f5keys = sorted(f5data.keys()); #f5keys.sort()
    for f5k in f5keys:
       temp_fa.write(''.join(['>', f5k, '\n', f5data[f5k][0], '\n']))
-   temp_fa.flush();   
+   temp_fa.flush();
    if moptions['outLevel']<=myCom.OUTPUT_DEBUG:
       end_time = time.time();
       print ("Write consuming time %d" % (end_time-start_time))
-   
+
    # run alignmen tools of bwa-mem or minimap2
    temp_sam = tempfile.NamedTemporaryFile()
    if moptions['alignStr']=='bwa':
@@ -406,7 +429,7 @@ def mDetect1(moptions, sp_options, f5files):
    sp_param['ref_info'] = defaultdict()
 
    if moptions['outLevel']<=myCom.OUTPUT_DEBUG:start_time = time.time();
-   ilid = 0; 
+   ilid = 0;
    # get alignment records
    while ilid < len(align_info):
       if len(align_info[ilid])==0 or align_info[ilid][0]=='@':
@@ -475,7 +498,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
      # output chromosome of interest
      if (not moptions['ConUnk']) and ((not rname.find('_')==-1) or (not rname.find('-')==-1) or (not rname.find('/')==-1) or (not rname.find(':')==-1)):
         continue;
-     isinreg = False; 
+     isinreg = False;
      # check the region of interest
      for cur_mr in moptions['region']:
         if (cur_mr[0] in ['', None, rname]):
@@ -512,7 +535,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
             rightclip += numinfo[-1]; readseq = readseq[:-numinfo[-1]]
          if mdiinfo[-1] in ['H']: rightclip += numinfo[-1]
          numinfo = numinfo[:-1]; mdiinfo = mdiinfo[:-1]
-     if forward_reverse=='+': # remove clipped events 
+     if forward_reverse=='+': # remove clipped events
         if rightclip>0: m_event = f5data[readk][1][leftclip:-rightclip]
         else: m_event = f5data[readk][1][leftclip:]
      else:
@@ -531,7 +554,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
      if not isinreg:
         continue;
 
-     lastmatch = None; firstmatch = None; 
+     lastmatch = None; firstmatch = None;
      first_match_pos = None; last_match_pos = None
      last_al_match = None;  first_al_match = None
      lasmtind = 0;
@@ -560,7 +583,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
               numinsert += 1
            elif mdi == 'D':
               base_map_info.append((refseq[pos], '-', pos, read_ind, 0))
-              pos += 1; 
+              pos += 1;
               numdel += 1
            elif mdi == 'N':
               base_map_info.append((refseq[pos], '-', pos, read_ind, 0))
@@ -582,16 +605,16 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
              if first_match_pos==None: first_match_pos  = pos
              if last_match_pos==None or last_match_pos<pos: last_match_pos = pos
              pos += 1; read_ind += 1;
-             if firstmatch==None: firstmatch = read_ind - 1 
+             if firstmatch==None: firstmatch = read_ind - 1
              if lastmatch==None or lastmatch<read_ind-1: lastmatch = read_ind - 1; lasmtind=n1ind
              if last_al_match==None or last_al_match<len(base_map_info): last_al_match=len(base_map_info)-1
              if first_al_match==None: first_al_match=len(base_map_info)-1
            elif mdi == 'X':
-             base_map_info.append((refseq[pos], readseq[read_ind], pos, read_ind, 0)) 
+             base_map_info.append((refseq[pos], readseq[read_ind], pos, read_ind, 0))
              pos += 1; read_ind += 1;
              nummismatch += 1
-           else:  
-             if moptions['outLevel']<=myCom.OUTPUT_WARNING: 
+           else:
+             if moptions['outLevel']<=myCom.OUTPUT_WARNING:
                 print ('CIGAR-Error!!!', 'Warning unknow CIGAR element ' + str(numinfo[n1ind]) + ' ' + mdi, f5data[readk][3])
      if firstmatch==None or lastmatch==None or firstmatch<0 or lastmatch<0:
         if moptions['outLevel']<=myCom.OUTPUT_WARNING:
@@ -607,7 +630,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
      else:
         if not firstmatch==None: rightclip += firstmatch
         if (not lastmatch==None) and len(m_event)-lastmatch>1: leftclip += len(m_event)-lastmatch-1
-      
+
      if forward_reverse=='+':
         if len(m_event)-lastmatch>1:
            m_event = m_event[firstmatch:(lastmatch+1-len(m_event))]
@@ -629,7 +652,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
            base_map_info = base_map_info[first_al_match:(last_al_match+1-len(base_map_info))]
         elif first_al_match>0:
            base_map_info = base_map_info[first_al_match:]
-        
+
      # format base
      base_map_info = np.array(base_map_info, dtype=[('refbase', 'U1'), ('readbase', 'U1'), ('refbasei', np.uint64), ('readbasei', np.uint64), ('mod_pred', np.int)])
      if forward_reverse=='-':
@@ -645,7 +668,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
            read_align_list = [bt.decode(encoding="utf-8") for bt in mf5[read_align_key]]
            ref_align_list = [bt.decode(encoding="utf-8") for bt in mf5[ref_align_key]]
            for rali in range(len(read_align_list)):
-              if not read_align_list[rali]==base_map_info['readbase'][rali]: 
+              if not read_align_list[rali]==base_map_info['readbase'][rali]:
                  print ("Error not equal1! %s %s %d %s" % (read_align_list[rali], base_map_info['readbase'][rali], rali, f5data[readk][3]))
               if not ref_align_list[rali]==base_map_info['refbase'][rali]:
                  print ("Error not equal2! %s %s %d %s" % (ref_align_list[rali], base_map_info['refbase'][rali], rali, f5data[readk][3]))
@@ -662,7 +685,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
                  while ali + addali < len(base_map_info):
                      if base_map_info['readbase'][ali+addali]=='-' and base_map_info['refbase'][ali+addali]=='G': addali += 1;
                      else: break;
-                 if ali + addali < len(base_map_info) and base_map_info['readbase'][ali+addali]=='G' and base_map_info['refbase'][ali+addali]=='G': 
+                 if ali + addali < len(base_map_info) and base_map_info['readbase'][ali+addali]=='G' and base_map_info['refbase'][ali+addali]=='G':
                     base_map_info['readbase'][ali+1], base_map_info['readbase'][ali+addali] = base_map_info['readbase'][ali+addali], base_map_info['readbase'][ali+1]
            if base_map_info['refbase'][ali]=='G' and base_map_info['readbase'][ali]=='G':
               if ali-1>-1 and base_map_info['readbase'][ali-1]=='-' and base_map_info['refbase'][ali-1]=='C':
@@ -701,7 +724,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
          pred_group = base_group.create_group(pred_f5_key)
 
          # save mapped chr, strand, positions
-         pred_group.attrs['mapped_chr'] = rname 
+         pred_group.attrs['mapped_chr'] = rname
          pred_group.attrs['mapped_strand'] = forward_reverse
          pred_group.attrs['mapped_start'] = base_map_info['refbasei'][0] if forward_reverse=='+' else base_map_info['refbasei'][-1]
          pred_group.attrs['mapped_end'] = base_map_info['refbasei'][-1] if forward_reverse=='+' else base_map_info['refbasei'][0]
@@ -709,7 +732,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
          if forward_reverse=='+':
             pred_group.attrs['clipped_bases_start'] = leftclip
             pred_group.attrs['clipped_bases_end'] = rightclip
-         else: 
+         else:
             pred_group.attrs['clipped_bases_start'] = rightclip
             pred_group.attrs['clipped_bases_end'] = leftclip
 
@@ -725,7 +748,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
          pred_group.attrs['readk'] = readk
          base_map_info = np.array(base_map_info, dtype=[('refbase', 'S1'), ('readbase', 'S1'), ('refbasei', np.uint64), ('readbasei', np.uint64), ('mod_pred', np.int)])
          pred_group.create_dataset('predetail', data=base_map_info, compression="gzip")
-            
+
          try:
             save_data.flush();
             save_data.close();
@@ -741,7 +764,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
       cur_chr = None; cur_writer = None;
       for mfi in sp_options['Mod']:
          if cur_chr==None or (not cur_chr == mfi[0]):
-            if not cur_chr==None: 
+            if not cur_chr==None:
                cur_writer.flush();
                cur_writer.close()
             cur_chr = mfi[0]
@@ -750,16 +773,16 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
          for mfidetail in mfi:
             cur_m_f.append(str(mfidetail))
          cur_m_f.append('\n')
-         cur_writer.write(' '.join(cur_m_f))   
-      if not cur_writer==None:    
+         cur_writer.write(' '.join(cur_m_f))
+      if not cur_writer==None:
          cur_writer.flush();
-         cur_writer.close()     
+         cur_writer.close()
 
 #
 # make modificatoin prediction for a long read
-# 
+#
 def mPredict1(moptions, sp_options, sp_param, mfeatures, base_map_info, readk, start_clip, end_clip):
-   # 
+   #
    modevents = sp_param['f5data'][readk][1]
    # get features. labels might be all zero
    t0, ty, tx = np.split(mfeatures, [1,3], axis=1);
@@ -770,14 +793,14 @@ def mPredict1(moptions, sp_options, sp_param, mfeatures, base_map_info, readk, s
       if ie>=start_clip and ie<len(modevents)-end_clip:
           m_y.append(ty[mind])
           # format to input with windoe size
-          m_data.append(tx[(mind-int(moptions['windowsize']/2)):(mind+int(moptions['windowsize']/2)+1)]) 
+          m_data.append(tx[(mind-int(moptions['windowsize']/2)):(mind+int(moptions['windowsize']/2)+1)])
 
    # for input
    test_feature = np.reshape(m_data, (len(m_data), len(m_data[0]), len(m_data[0][0])))
    test_label = np.reshape(m_y, (len(m_y), len(m_y[0]))).astype(int)
- 
+
    sp_options['rnn'][0].run(sp_options['rnn'][3])
- 
+
    # split into small group
    if len(test_feature) > rnn_pred_batch_size*1.2:
       x_sub_group = np.array_split(test_feature, int(len(test_feature)/rnn_pred_batch_size))
@@ -792,21 +815,21 @@ def mPredict1(moptions, sp_options, sp_param, mfeatures, base_map_info, readk, s
       else:
          mfpred_output = np.concatenate((mfpred_output, (sp_options['rnn'][0].run([sp_options['rnn'][4]], \
                feed_dict={sp_options['rnn'][1]:x_sub_group[subi], sp_options['rnn'][2]:y_sub_group[subi]}))[0]), axis=0);
- 
+
    # associate the prediction with reference positions and read positions
    modevents = sp_param['f5data'][readk][1]
    aligni = 0; pred_mod_num = 0;
    for ie in range(start_clip, len(modevents)-end_clip):
-      while base_map_info['readbase'][aligni]=='-': aligni += 1 
+      while base_map_info['readbase'][aligni]=='-': aligni += 1
       if not base_map_info['readbase'][aligni] == modevents['model_state'][ie][2]:
          print ('Error Does not match', base_map_info['readbase'][aligni], modevents['model_state'][ie][2], aligni, ie)
       if mfpred_output[ie-start_clip]==1:
          base_map_info['mod_pred'][aligni] = 1;
          pred_mod_num += 1;
- 
-      aligni += 1 
+
+      aligni += 1
    return pred_mod_num
- 
+
 #
 # get feature for a long read
 #
@@ -818,7 +841,7 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
       align_ref_pos = mapped_start_pos
    else:
       align_ref_pos = mapped_start_pos + len(base_map_info) - num_insertions - 1
-   
+
    # initialize feature matrix
    if moptions['fnum']==57:
       mfeatures = np.zeros((len(modevents)-end_clip+100-(start_clip-100), (binnum+3+3+4)));
@@ -899,12 +922,12 @@ def calculate_mean_std(m_event, event_ind, forward_reverse, raw_pv, moptions, sp
 
 #
 # get required information from a mapped record
-# 
+#
 def handle_line(moptions, sp_param, f5align):
    lsp = sp_param['line'].split('\t')
    qname, flag, rname, pos, mapq, cigar, _, _, _, seq, _ = lsp[:11]
    # check query name, map quality, reference position, cigar and reference name
-   if qname=='*': sp_param['f5status'] = "qname is *" 
+   if qname=='*': sp_param['f5status'] = "qname is *"
    elif int(mapq)==255: sp_param['f5status'] = "mapq is 255"
    elif int(pos)==0: sp_param['f5status'] = "pos is 0"
    elif cigar=='*': sp_param['f5status'] = "cigar is *"
@@ -920,39 +943,39 @@ def handle_line(moptions, sp_param, f5align):
 # the worker of the detection in a multiprocessing way
 #
 def detect_handler(moptions, h5files_Q, failed_Q, file_map_info_q):
-   
+
    _, init_l, _, _, _, X, Y, _, _, _, _, mfpred = myMultiBiRNN.mCreateSession(moptions['fnum'], moptions['hidden'], moptions['windowsize'], moptions)
    config = tf.ConfigProto()
    config.gpu_options.allow_growth = True
-   sess = tf.Session(config=config) 
+   sess = tf.Session(config=config)
    # load module
    new_saver = tf.train.import_meta_graph(moptions['modfile'][0]+'.meta')
    new_saver.restore(sess,tf.train.latest_checkpoint(moptions['modfile'][1]))
-  
+
    while not h5files_Q.empty():
       cur_start_time = time.time()
       try:
          # get fast5 file
          f5files, ctfolderid, batchid = h5files_Q.get(block=False)
       except:
-         break; 
+         break;
 
       sp_options = defaultdict();
       sp_options['ctfolderid'] = ctfolderid
       sp_options['ctfolder'] = moptions['outFolder']+moptions['FileID']+'/'+str(ctfolderid)
       if not os.path.isdir(sp_options['ctfolder']):
          os.system('mkdir '+sp_options['ctfolder'])
-      #if moptions['testrnn']: 
+      #if moptions['testrnn']:
       sp_options['rnn'] = (sess, X, Y, init_l, mfpred)
       sp_options['batchid'] = batchid
-  
+
       sp_options['Mod'] = [];
       # make modification prediction for each fast5
       mDetect1(moptions, sp_options, f5files)
       # outputing errors
       for errtype, errfiles in sp_options["Error"].items():
          failed_Q.put((errtype, errfiles));
-  
+
       print ("Cur Prediction consuming time %d for %d %d" % (time.time() - cur_start_time, ctfolderid, batchid))
 
    sess.close()
@@ -969,7 +992,7 @@ def read_file_list(cur_cif, cur_chr, cur_strand, sp_options):
            if len(line)>0:
               lsp = line.split();
               if line[0]=='#':
-                 if lsp[1][0] not in ['/', '\\']: 
+                 if lsp[1][0] not in ['/', '\\']:
                     lsp[1] = lsp[1] + '/'
                  if lsp[0]=='#base_folder_fast5': sp_options['base_folder_fast5'] = lsp[1];
                  elif lsp[0]=='#base_folder_output': sp_options['base_folder_output'] = lsp[1];
@@ -979,7 +1002,7 @@ def read_file_list(cur_cif, cur_chr, cur_strand, sp_options):
                  if not lsp[0]==cur_chr:
                     print ('Warning!!! The chr should be %s but % is found.' % (cur_chr, lsp[0]))
            line = mr.readline();
-   sp_options['handlingList'] = cur_list  
+   sp_options['handlingList'] = cur_list
 
 #
 # get prediction detail
@@ -988,7 +1011,7 @@ def read_pred_detail(moptions, sp_options, f5info):
    f5pred_file = sp_options['base_folder_output'] + '/' + f5info[5]
    f5_pred_key = ('/pred/%s/predetail' % f5info[3])
    # get prediction detail from saved prediction file
-   # each file contains predictions for multiple fast5   
+   # each file contains predictions for multiple fast5
    with h5py.File(f5pred_file, 'r') as mr:
       m_pred = mr[f5_pred_key].value;
       mapped_chrom = mr['/pred/%s' % f5info[3]].attrs['mapped_chr'] #.decode(encoding="utf-8")
@@ -1068,7 +1091,7 @@ def sum_handler(moptions, chr_strand_Q):
                sp_options['4NA'][m_pred['refbase'][mi]][(cur_chr, cur_strand, int(m_pred['refbasei'][mi]) )] = [0, 0, m_pred['refbase'][mi]]
             if not (m_pred['refbase'][mi] == sp_options['4NA'][m_pred['refbase'][mi]][(cur_chr, cur_strand, int(m_pred['refbasei'][mi]) )][2]):
                print ('Error !!!! NA not equal %s == %s' % (m_pred['refbase'][mi], sp_options['4NA'][m_pred['refbase'][mi]][(cur_chr, cur_strand, int(m_pred['refbasei'][mi]) )][2]))
-            if not m_pred['readbase'][mi]=='-':  
+            if not m_pred['readbase'][mi]=='-':
                sp_options['4NA'][m_pred['refbase'][mi]][(cur_chr, cur_strand, int(m_pred['refbasei'][mi]) )][0] += 1
                if -0.1 < m_pred['mod_pred'][mi]-1 < 0.1:
                   sp_options['4NA'][m_pred['refbase'][mi]][(cur_chr, cur_strand, int(m_pred['refbasei'][mi]) )][1] += 1
@@ -1103,7 +1126,7 @@ def mDetect_manager(moptions):
 
    # need to make prediction of modification
    if moptions['predDet']==1:
-   
+
       # get well-trained model
       if moptions['modfile'].rfind('/')==-1:
          moptions['modfile'] = [moptions['modfile'], './']
@@ -1118,8 +1141,8 @@ def mDetect_manager(moptions):
          f5files.extend(glob.glob(os.path.join(moptions['wrkBase'],"*/*.fast5" )))
          f5files.extend(glob.glob(os.path.join(moptions['wrkBase'],"*/*/*.fast5" )))
          f5files.extend(glob.glob(os.path.join(moptions['wrkBase'],"*/*/*/*.fast5" )))
- 
-      print('Total files=%d' % len(f5files)) 
+
+      print('Total files=%d' % len(f5files))
 
       # output folder
       if not os.path.isdir(moptions['outFolder']+moptions['FileID']):
@@ -1131,7 +1154,7 @@ def mDetect_manager(moptions):
       failed_Q = pmanager.Queue()
 
       # spliting fast5 files into different lists
-      h5_batch = []; h5batchind = 0; 
+      h5_batch = []; h5batchind = 0;
       sub_folder_size = 100; sub_folder_id = 0;
       for f5f in f5files:
          h5_batch.append(f5f);
@@ -1159,7 +1182,7 @@ def mDetect_manager(moptions):
          try:
             errk, fns = failed_Q.get(block=False);
             failed_files[errk].extend(fns)
-         
+
          except:
             time.sleep(1);
             continue;
@@ -1202,7 +1225,7 @@ def mDetect_manager(moptions):
       moptions['outFolder'] = moptions['outFolder']+moptions['FileID']
       end_time = time.time();
       print ("Per-read Prediction consuming time %d" % (end_time-start_time))
-   
+
    ### for summarizing modificatoin prediction
    start_time = time.time();
    # get all index files of prediction
@@ -1215,9 +1238,9 @@ def mDetect_manager(moptions):
    for cur_cif in all_chr_ind_files:
       chr_strand_Q.put((cur_cif, cur_cif.split(pre_base_str)[-1][1:], '+'))
       chr_strand_Q.put((cur_cif, cur_cif.split(pre_base_str)[-1][1:], '-'))
-      jobnum +=2 
-  
-   # star to summarize modificaiton prediction of reference genomes of interest 
+      jobnum +=2
+
+   # star to summarize modificaiton prediction of reference genomes of interest
    share_var = (moptions, chr_strand_Q)
    handlers = []
    for hid in range(moptions['threads'] if moptions['threads']<jobnum else jobnum):
@@ -1252,11 +1275,9 @@ if __name__=='__main__':
       moptions['fnum'] = 3;
       moptions['hidden'] = 100;
       moptions['windowsize'] = 21;
-  
+
       moptions['threads'] = 8
       moptions['threads'] = 1
       moptions['files_per_thread'] = 500
 
       mDetect_manager(moptions)
-
-

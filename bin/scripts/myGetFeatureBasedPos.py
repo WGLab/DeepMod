@@ -35,11 +35,11 @@ def mGetFeature1(moptions, sp_options, f5files):
    f5keys = sorted(f5data.keys()); #f5keys.sort()
    for f5k in f5keys:
       temp_fa.write(''.join(['>', f5k, '\n', f5data[f5k][0], '\n']))
-   temp_fa.flush();   
+   temp_fa.flush();
    if moptions['outLevel']<=myCom.OUTPUT_DEBUG:
       end_time = time.time();
       print ("Write consuming time %d" % (end_time-start_time))
-   
+
    # alignment using bwa-mem or minimap2
    temp_sam = tempfile.NamedTemporaryFile()
    if moptions['alignStr']=='bwa':
@@ -70,7 +70,7 @@ def mGetFeature1(moptions, sp_options, f5files):
    sp_param['ref_info'] = defaultdict()
 
    if moptions['outLevel']<=myCom.OUTPUT_DEBUG:start_time = time.time();
-   ilid = 0; 
+   ilid = 0;
    # for each record in sam, get alignment information
    while ilid < len(align_info):
       if len(align_info[ilid])==0 or align_info[ilid][0]=='@':
@@ -134,7 +134,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
 
      if not ( (rname in moptions['fulmodlist'] and len(moptions['fulmodlist'][rname])>0) or \
         ((not moptions['anymodlist']==None) and rname in moptions['anymodlist'] and len(moptions['anymodlist'][rname])>0) or \
-        ((not moptions['nomodlist']==None) and rname in moptions['nomodlist'] and len(moptions['nomodlist'][rname])>0) ): 
+        ((not moptions['nomodlist']==None) and rname in moptions['nomodlist'] and len(moptions['nomodlist'][rname])>0) ):
         continue;
 
      # get reference sequece
@@ -164,7 +164,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
             rightclip += numinfo[-1]; readseq = readseq[:-numinfo[-1]]
          if mdiinfo[-1] in ['H']: rightclip += numinfo[-1]
          numinfo = numinfo[:-1]; mdiinfo = mdiinfo[:-1]
-     if forward_reverse=='+': 
+     if forward_reverse=='+':
         if rightclip>0: m_event = f5data[readk][1][leftclip:-rightclip]
         else: m_event = f5data[readk][1][leftclip:]
      else:
@@ -181,7 +181,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
         continue;
 
      # associate mapped reference positions with read positions
-     lastmatch = None; firstmatch = None; 
+     lastmatch = None; firstmatch = None;
      first_match_pos = None; last_match_pos = None
      last_al_match = None;  first_al_match = None
      lasmtind = 0;
@@ -209,7 +209,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
               numinsert += 1
            elif mdi == 'D':
               base_map_info.append((refseq[pos], '-', pos, read_ind))
-              pos += 1; 
+              pos += 1;
               numdel += 1
            elif mdi == 'N':
               base_map_info.append((refseq[pos], '-', pos, read_ind))
@@ -231,16 +231,16 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
              if first_match_pos==None: first_match_pos  = pos
              if last_match_pos==None or last_match_pos<pos: last_match_pos = pos
              pos += 1; read_ind += 1;
-             if firstmatch==None: firstmatch = read_ind - 1 
+             if firstmatch==None: firstmatch = read_ind - 1
              if lastmatch==None or lastmatch<read_ind-1: lastmatch = read_ind - 1; lasmtind=n1ind
              if last_al_match==None or last_al_match<len(base_map_info): last_al_match=len(base_map_info)-1
              if first_al_match==None: first_al_match=len(base_map_info)-1
            elif mdi == 'X':
-             base_map_info.append((refseq[pos], readseq[read_ind], pos, read_ind)) 
+             base_map_info.append((refseq[pos], readseq[read_ind], pos, read_ind))
              pos += 1; read_ind += 1;
              nummismatch += 1
-           else:  
-             if moptions['outLevel']<=myCom.OUTPUT_WARNING: 
+           else:
+             if moptions['outLevel']<=myCom.OUTPUT_WARNING:
                 print ('CIGAR-Error!!!', 'Warning unknow CIGAR element ' + str(numinfo[n1ind]) + ' ' + mdi, f5data[readk][3])
      if firstmatch==None or lastmatch==None or firstmatch<0 or lastmatch<0:
         if moptions['outLevel']<=myCom.OUTPUT_WARNING:
@@ -252,7 +252,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
      # remove unmatch in both tails
      if not firstmatch==None: leftclip += firstmatch
      if (not lastmatch==None) and len(m_event)-lastmatch>1: rightclip += len(m_event)-lastmatch-1
-     # remove events whose bases are not mapped. 
+     # remove events whose bases are not mapped.
      if forward_reverse=='+':
         if len(m_event)-lastmatch>1:
            m_event = m_event[firstmatch:(lastmatch+1-len(m_event))]
@@ -274,8 +274,8 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
            base_map_info = base_map_info[first_al_match:(last_al_match+1-len(base_map_info))]
         elif first_al_match>0:
            base_map_info = base_map_info[first_al_match:]
-     
-     # post-process mapping information   
+
+     # post-process mapping information
      base_map_info = np.array(base_map_info, dtype=[('refbase', 'U1'), ('readbase', 'U1'), ('refbasei', np.uint64), ('readbasei', np.uint64)])
      if forward_reverse=='-':
         base_map_info = np.flipud(base_map_info)
@@ -290,7 +290,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
            read_align_list = [bt.decode(encoding="utf-8") for bt in mf5[read_align_key]]
            ref_align_list = [bt.decode(encoding="utf-8") for bt in mf5[ref_align_key]]
            for rali in range(len(read_align_list)):
-              if not read_align_list[rali]==base_map_info['readbase'][rali]: 
+              if not read_align_list[rali]==base_map_info['readbase'][rali]:
                  print ("Error not equal1! %s %s %d %s" % (read_align_list[rali], base_map_info['readbase'][rali], rali, f5data[readk][3]))
               if not ref_align_list[rali]==base_map_info['refbase'][rali]:
                  print ("Error not equal2! %s %s %d %s" % (ref_align_list[rali], base_map_info['refbase'][rali], rali, f5data[readk][3]))
@@ -307,7 +307,7 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
                  while ali + addali < len(base_map_info):
                      if base_map_info['readbase'][ali+addali]=='-' and base_map_info['refbase'][ali+addali]=='G': addali += 1;
                      else: break;
-                 if ali + addali < len(base_map_info) and base_map_info['readbase'][ali+addali]=='G' and base_map_info['refbase'][ali+addali]=='G': 
+                 if ali + addali < len(base_map_info) and base_map_info['readbase'][ali+addali]=='G' and base_map_info['refbase'][ali+addali]=='G':
                     base_map_info['readbase'][ali+1], base_map_info['readbase'][ali+addali] = base_map_info['readbase'][ali+addali], base_map_info['readbase'][ali+1]
            if base_map_info['refbase'][ali]=='G' and base_map_info['readbase'][ali]=='G':
               if ali-1>-1 and base_map_info['readbase'][ali-1]=='-' and base_map_info['refbase'][ali-1]=='C':
@@ -319,10 +319,10 @@ def handle_record(moptions, sp_options, sp_param, f5align, f5data):
                      base_map_info['readbase'][ali-1], base_map_info['readbase'][ali-addali] = base_map_info['readbase'][ali-addali], base_map_info['readbase'][ali-1]
      # too short reads
      if len(m_event)<500:
-         sp_options["Error"]["Less(<500) events"].append(f5data[readk][3]) 
+         sp_options["Error"]["Less(<500) events"].append(f5data[readk][3])
          continue;
 
-     # get feautre 
+     # get feautre
      mfeatures,isdif = get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, leftclip, rightclip, base_map_info, forward_reverse, rname, first_match_pos, numinsert, numdel)
      if isdif and moptions['outLevel']<=myCom.OUTPUT_WARNING:
         print("Dif is true")
@@ -361,7 +361,7 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
       align_ref_pos = mapped_start_pos
    else:
       align_ref_pos = mapped_start_pos + len(base_map_info) - num_insertions - 1
-   
+
    # initialize feature matrix for all events.
    if moptions['fnum']==57:
       #mfeatures = np.zeros((len(modevents)-end_clip+100-(start_clip-100), (binnum+3+3+4)));
@@ -467,7 +467,7 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
          cur_base = base_map_info['refbase'][aligni]
          # the second/third column is for negative/positive labels of methylation
          if moptions['posneg'] == 0: # for a data without any modification
-            if ( rname in moptions['nomodlist'] and (forward_reverse, base_map_info['refbasei'][aligni]) in moptions['nomodlist'][rname] ):
+            if ( (not moptions['anymodlist']==None) and rname in moptions['nomodlist'] and (forward_reverse, base_map_info['refbasei'][aligni]) in moptions['nomodlist'][rname] ):
                 mfeatures[cur_row_num][1] = 1; mfeatures[cur_row_num][2] = 0
             elif (forward_reverse, base_map_info['refbasei'][aligni]) in moptions['fulmodlist'][rname]:
                 mfeatures[cur_row_num][1] = 1; mfeatures[cur_row_num][2] = 0
@@ -478,7 +478,7 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
                mfeatures[cur_row_num][1] = 0; mfeatures[cur_row_num][2] = 1
             else:
                if (forward_reverse, base_map_info['refbasei'][aligni]) not in cgpos[1]:
-                  if moptions['anymodlist']==None: 
+                  if moptions['anymodlist']==None:
                       if moptions['nomodlist']==None or ( rname in moptions['nomodlist'] and (forward_reverse, base_map_info['refbasei'][aligni]) in moptions['nomodlist'][rname] ):
                          mfeatures[cur_row_num][1] = 1; mfeatures[cur_row_num][2] = 0
                   elif rname in moptions['anymodlist'] and (forward_reverse, base_map_info['refbasei'][aligni]) in moptions['anymodlist'][rname]:
@@ -491,7 +491,7 @@ def get_Feature(moptions, sp_options, sp_param, f5align, f5data, readk, start_cl
             else: align_ref_pos -= 1
          aligni += 1
 
-      # for bin features 
+      # for bin features
       if ie>=0 and ie<len(modevents) and moptions['fnum']==57:
          for currs in sp_param['f5data'][readk][2][modevents['start'][ie]:int(modevents['start'][ie]+int(modevents['length'][ie]+0.5))]:
              if currs>10 or currs<-10: print ('Error raw signal', currs, ie, modevents['start'][ie], modevents['length'][ie])
@@ -542,7 +542,7 @@ def handle_line(moptions, sp_param, f5align):
    lsp = sp_param['line'].split('\t')
    qname, flag, rname, pos, mapq, cigar, _, _, _, seq, _ = lsp[:11]
    # checked query name
-   if qname=='*': sp_param['f5status'] = "qname is *" 
+   if qname=='*': sp_param['f5status'] = "qname is *"
    # check mapping quality
    elif int(mapq)==255: sp_param['f5status'] = "mapq is 255"
    # check mapped positions
@@ -559,7 +559,7 @@ def handle_line(moptions, sp_param, f5align):
    return qname
 
 #
-# feature handler/workder for multiprocessing 
+# feature handler/workder for multiprocessing
 #
 def getFeature_handler(moptions, h5files_Q, failed_Q, version_Q):
    while not h5files_Q.empty():
@@ -590,7 +590,7 @@ def readFA(mfa, t_chr=None):
    with open(mfa, 'r') as mr:
       cur_chr = None;
       line = mr.readline();
-      while line: 
+      while line:
          # remove empty spaces
          line = line.strip();
          if len(line)>0:
@@ -654,13 +654,13 @@ def getFeature_manager(moptions):
    start_time = time.time();
    # multipprocessing manager
    pmanager = multiprocessing.Manager();
- 
+
    # prepare output folder
    if os.path.isdir(moptions['outFolder']):
       os.system('rm -dr '+moptions['outFolder'])
    if not os.path.isdir(moptions['outFolder']):
       os.system('mkdir '+moptions['outFolder'])
-  
+
    moptions['size_per_batch'] = moptions['size_per_batch'] * (10**7)
 
    # read reference information
@@ -668,7 +668,7 @@ def getFeature_manager(moptions):
    if moptions['motifORPos']==1: # get motif-based positions for modifications
       moptions['fulmodlist'], moptions['nomodlist'] = readMotifMod(fadict, moptions['motif'][0], moptions['motif'][1], moptions['region'][0], moptions['region'][1], moptions['region'][2])
       moptions['anymodlist'] = None
-      moptions['nomodlist'] = {_mk:{} for _mk in moptions['nomodlist'].keys()}; # add for simple process
+      moptions['nomodlist'] = None; # add for simple process
    elif moptions['motifORPos']==2: # modification position is specified by the files
       fuldfiles = glob.glob(moptions["fulmod"]);
       moptions['fulmodlist'] = defaultdict(lambda: defaultdict());
@@ -685,7 +685,7 @@ def getFeature_manager(moptions):
       mthreadin = [moptions['fulmodlist'], moptions['anymodlist'], moptions['nomodlist']]
       mthfiles = [fuldfiles, anydfiles, nodfiles]
       # read completely modified positions, partially modified positions, completely un-modified positions from files
-      for mthi in range(len(mthreadin)): 
+      for mthi in range(len(mthreadin)):
          curmeth = mthreadin[mthi]; curfilelist = mthfiles[mthi]
          if curmeth==None or curfilelist==None: continue;
          for curmthf in curfilelist:
@@ -698,7 +698,7 @@ def getFeature_manager(moptions):
                    line = mreader.readline();
    for tchr in moptions['fulmodlist'] if moptions['anymodlist']==None else moptions['anymodlist']:
       if len(moptions['fulmodlist'][tchr])>0 or ((not moptions['anymodlist']==None) and len(moptions['anymodlist'][tchr])>0):
-         print ('%s fulmod=%d anymod=%d nomod=%d' % (tchr, len(moptions['fulmodlist'][tchr]), len(moptions['anymodlist'][tchr]) if (not moptions['anymodlist']==None) else -1, len(moptions['nomodlist'][tchr]) if (not moptions['nomodlist']==None) else -1))
+          print ('%s fulmod=%d anymod=%d nomod=%d' % (tchr, len(moptions['fulmodlist'][tchr]), len(moptions['anymodlist'][tchr]) if (not moptions['anymodlist']==None) else -1, len(moptions['nomodlist'][tchr]) if (not moptions['nomodlist']==None) else -1))
 
    if True: #False:
       # get all input fast5 files
@@ -708,8 +708,8 @@ def getFeature_manager(moptions):
          f5files.extend(glob.glob(os.path.join(moptions['wrkBase'],"*/*/*.fast5" )))
          f5files.extend(glob.glob(os.path.join(moptions['wrkBase'],"*/*/*/*.fast5" )))
 
- 
-   print('Total files=%d' % len(f5files)) 
+
+   print('Total files=%d' % len(f5files))
    h5files_Q = pmanager.Queue();
    failed_Q = pmanager.Queue()
    version_Q = pmanager.Queue()
@@ -745,7 +745,7 @@ def getFeature_manager(moptions):
       except:
          time.sleep(1);
          continue;
-   
+
    # output failure information
    if len(failed_files)>0:
       print ('Error information for different fast5 files:')
@@ -756,7 +756,7 @@ def getFeature_manager(moptions):
    end_time = time.time();
    print ("Total consuming time %d" % (end_time-start_time))
 
-   
+
 
 # for indepdent testing of code
 if __name__=='__main__':
@@ -774,11 +774,9 @@ if __name__=='__main__':
       moptions['fnum'] = 53;
       moptions['hidden'] = 100;
       moptions['windowsize'] = 21;
-  
+
       moptions['threads'] = 8
       moptions['threads'] = 1
       moptions['files_per_thread'] = 500
 
       mDetect_manager(moptions)
-
-
