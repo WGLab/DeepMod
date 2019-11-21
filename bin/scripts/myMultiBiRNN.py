@@ -38,7 +38,7 @@ def mCreateSession(num_input, num_hidden, timesteps, moptions):
    def BiRNN(x, weights, biases):
       x = tf.unstack(x, timesteps, 1);
 
-      # define the LSTM cells   
+      # define the LSTM cells
       lstm_fw_cell = rnn.MultiRNNCell([rnn.BasicLSTMCell(num_hidden, forget_bias=1.0) for _ in range(numlayers)]);
       lstm_bw_cell = rnn.MultiRNNCell([rnn.BasicLSTMCell(num_hidden, forget_bias=1.0) for _ in range(numlayers)]);
 
@@ -58,7 +58,7 @@ def mCreateSession(num_input, num_hidden, timesteps, moptions):
    logits = BiRNN(X, weights, biases);
    prediction = tf.nn.softmax(logits)
 
-   mfpred=tf.argmax(prediction,1) 
+   mfpred=tf.argmax(prediction,1)
 
    ## with different class-weights or not
    if 'unbalanced' in moptions and (not moptions['unbalanced']==None) and moptions['unbalanced']==1:  # class_weights
@@ -67,7 +67,7 @@ def mCreateSession(num_input, num_hidden, timesteps, moptions):
       loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=Y))
    #
 
-   # for optimizer   
+   # for optimizer
    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate);
    train_op = optimizer.minimize(loss_op);
 
@@ -87,7 +87,7 @@ def mCreateSession(num_input, num_hidden, timesteps, moptions):
    init_l = tf.local_variables_initializer()
 
    saver = tf.train.Saver();
-   
+
    return (init, init_l, loss_op, accuracy, train_op, X, Y, saver, auc_op, mpre, mspf, mfpred)
 
 #
@@ -115,7 +115,7 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
    with tf.Session(config=config) as sess:
       # initialization
       sess.run(init);
-      sess.run(init_l) 
+      sess.run(init_l)
       start_time = time.time(); start_c_time = time.time();
       io_time = 0;
 
@@ -130,7 +130,7 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
 
              # for each input groups.
              # usually two groups: one positive group and one negative group
-             # might also one group containing both positive and negative labelling data 
+             # might also one group containing both positive and negative labelling data
              featurelist = [[[], []] for _ in range(len(filelists))];
              minsize = None; cur_batch_num = None;
              # get data from all groups until 'minsize' data is loaded.
@@ -139,7 +139,7 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
                    minsize = batchsize * sumpsize
                 else: minsize = batchsize * cur_batch_num;
                 while len(featurelist[ifl][0])<minsize:
-                   if not file_group_id[ifl] < len(filelists[ifl]): 
+                   if not file_group_id[ifl] < len(filelists[ifl]):
                       if ifl==0: break;
                       else: file_group_id[ifl] = 0
                    # get more data
@@ -155,7 +155,7 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
                    file_group_id[ifl] += 1;
                 # split for small groups for training
                 if ifl==0:
-                   featurelist[ifl][0] = np.array_split(featurelist[ifl][0], int(len(featurelist[ifl][0])/batchsize)) 
+                   featurelist[ifl][0] = np.array_split(featurelist[ifl][0], int(len(featurelist[ifl][0])/batchsize))
                    featurelist[ifl][1] = np.array_split(featurelist[ifl][1], int(len(featurelist[ifl][1])/batchsize))
                    cur_batch_num = len(featurelist[ifl][0])
              if len(featurelist[0][0])<sumpsize*0.8:
@@ -173,7 +173,7 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
              io_time += (time.time() - io_start_time)
 
              ifl=3 if len(featurelist)>3 else len(featurelist)-1
-             if (file_group_id[0]+1) - last_desplay_files_num >= desplay_files: 
+             if (file_group_id[0]+1) - last_desplay_files_num >= desplay_files:
                 sess.run(init_l)
                 try:
                    # print some testing information as progress indicators
@@ -197,9 +197,9 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
                                opstr = []
                                for tol in tok:
                                    opstr.append(str(round(tol, 2)))
-                               print("\t\t\t"+','.join(opstr)) 
+                               print("\t\t\t"+','.join(opstr))
                          sys.exit(1)
-                      
+
 
              # adjust progress output information
              ifl=3 if len(featurelist)>3 else len(featurelist)-1
@@ -220,7 +220,7 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
                         os.system('mkdir -p '+moptions['outFolder']+str(step-1)+savp);
                     saver.save(sess, moptions['outFolder']+str(step-1)+savp+'/'+moptions['FileID']);
          # for each epoch, store the trained model
-         if (not os.path.isdir(moptions['outFolder']+str(step))): 
+         if (not os.path.isdir(moptions['outFolder']+str(step))):
             os.system('mkdir -p '+moptions['outFolder']+str(step));
          saver.save(sess, moptions['outFolder']+str(step)+'/'+moptions['FileID']);
       print("Training Finished!")
@@ -229,14 +229,14 @@ def train_save_model(filelists, num_input, mhidden, timesteps, moptions):
 
 #
 # get all data files in a folder
-# 
+#
 def getTFiles1(folder1, moptions):
    t1files = glob.glob(os.path.join(folder1, "*.xy.gz"))
    # get all data in a recursive way
    if moptions['recursive']==1:
       t1files.extend(glob.glob(os.path.join(folder1, "*/*.xy.gz")))
-      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*.xy.gz"))); 
-      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*.xy.gz"))); 
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*.xy.gz")));
+      t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*.xy.gz")));
       t1files.extend(glob.glob(os.path.join(folder1, "*/*/*/*/*.xy.gz")));
    print("Get folder1");
    # for read-based independent testing
@@ -266,7 +266,7 @@ def getTFiles(folder1, folder2, moptions):
    print(t1files.__sizeof__(), len(t1files))
    if moptions['test'][0] == '0':
       if moptions['test'][1]>0.5:
-         t1files = t1files[:int(len(t1files)*moptions['test'][1])] 
+         t1files = t1files[:int(len(t1files)*moptions['test'][1])]
       else: t1files = t1files[-int(len(t1files)*moptions['test'][1]):]
    print(t1files.__sizeof__(), len(t1files))
    sys.stdout.flush();
@@ -336,7 +336,7 @@ def getDataFromFile_new(fn, moptions, mfind0ld=None):
       if has_nan_value:
          if fn in nan_file: pass
          else:
-             print ("Warning-nan-value {}".format(fn)) 
+             print ("Warning-nan-value {}".format(fn))
              nan_file.append(fn);
       else:
          m_y.append(ty[mind])
@@ -348,7 +348,7 @@ def getDataFromFile_new(fn, moptions, mfind0ld=None):
       ptofkeys = sorted(list(pos_to_file_dict.keys()))
       for npk_ind in range(len(ptofkeys)):
          if (npk_ind+1<len(ptofkeys) and ptofkeys[npk_ind+1]-ptofkeys[npk_ind]<500) or len(m_y)-ptofkeys[npk_ind]<500: continue;
- 
+
          file_to_pos_dict[ pos_to_file_dict[ptofkeys[npk_ind]] ] = [ptofkeys[npk_ind], (ptofkeys[npk_ind+1] if npk_ind+1<len(ptofkeys) else len(m_y))]
 
    # reshape the data
@@ -453,7 +453,7 @@ def mMult_RNN_LSTM_train(moptions):
          moptions['modfile'] = [moptions['modfile'], './']
       else:
          moptions['modfile'] = [moptions['modfile'], moptions['modfile'][:moptions['modfile'].rfind('/')+1]]
- 
+
    if not mostid==0:
       filelists[mostid], filelists[0] = filelists[0], filelists[mostid]
 
@@ -475,6 +475,3 @@ def pred_entry(moptions):
       moptions['modfile'] = [moptions['modfile'], moptions['modfile'][:moptions['modfile'].rfind('/')+1]]
 
    pred_prepare(moptions, tfiles, accuracy, X, Y, auc_op, mpre, mspf, init_l, mfpred)
-
-
-
