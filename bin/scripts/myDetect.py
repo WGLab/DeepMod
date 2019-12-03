@@ -65,10 +65,10 @@ def getAlbacoreVersion(moptions, sp_param):
    try:
       ver_path = ''.join([fast5_analysis,'/', moptions['basecall_1d'] ])
       #add .decode("utf-8")  to make it compatible to py3
-      if 'version' not in sp_param['f5reader'][ver_path].attrs:
-         ver_path = ''.join([fast5_analysis,'/', moptions['basecall_1d'], '/', moptions['basecall_2strand'] ])
-      
-      used_version = LooseVersion(sp_param['f5reader'][ver_path].attrs['version'].decode("utf-8")  if 'version' in sp_param['f5reader'][ver_path].attrs else "0.0")
+      try:
+         used_version = LooseVersion(sp_param['f5reader'][ver_path].attrs['version'].decode("utf-8")  if 'version' in sp_param['f5reader'][ver_path].attrs else "0.0")
+      except:
+         used_version = LooseVersion(sp_param['f5reader'][ver_path].attrs['version']  if 'version' in sp_param['f5reader'][ver_path].attrs else "0.0")
       sp_param['get_albacore_version'] = used_version
       if used_version < LooseVersion("1.0"): #
          sp_param['used_albacore_version'] = 1;
