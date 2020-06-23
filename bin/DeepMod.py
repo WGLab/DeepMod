@@ -9,7 +9,7 @@ from collections import defaultdict
 import argparse;
 from argparse import RawTextHelpFormatter
 
-from scripts.myCom import *
+from DeepMod_scripts.myCom import *
 
 # three modules in DeepMod
 parser = argparse.ArgumentParser(description="Detect nucleotide modification from nanopore signals data.", epilog="For example, \n \
@@ -132,7 +132,9 @@ def mDetect(margs):
       moptions['modfile'] = margs.modfile
       if moptions['modfile']==None:
          print("No mod file is provided. The default one is used")
-         moptions['modfile'] = ('train_mod/rnn_P90wd%d_f53/mod_train_P90wd%d_f53' % (moptions['windowsize'], moptions['windowsize']))
+         moptions['modfile'] = ('train_deepmod/rnn_P90wd%d_f53/mod_train_P90wd%d_f53' % (moptions['windowsize'], moptions['windowsize']))
+         if (not os.path.isfile(moptions['modfile']+'.meta')):
+            moptions['modfile'] = ('%s/train_deepmod/rnn_P90wd%d_f53/mod_train_P90wd%d_f53' % (sys.prefix, moptions['windowsize'], moptions['windowsize']))
       if (not os.path.isfile(moptions['modfile']+'.meta')):
          ErrorMessage = ErrorMessage + ("\n\tThe meta file (%s) does not exist" % (moptions['modfile']+'.meta' if not moptions['modfile']==None else ""))
    else:
@@ -171,7 +173,7 @@ def mDetect(margs):
       parser.parse_args(['detect', '--help']);
       sys.exit(1)
 
-   from scripts import myDetect
+   from DeepMod_scripts import myDetect
    myDetect.mDetect_manager(moptions)
 
 #
@@ -179,7 +181,7 @@ def mDetect(margs):
 # Need to get features first.
 #
 def mTrain(margs):
-   from scripts import myMultiBiRNN
+   from DeepMod_scripts import myMultiBiRNN
 
    # gent common options
    moptions, ErrorMessage = mCommonParam(margs)
@@ -233,7 +235,7 @@ def mTrain(margs):
 #
 #
 def mGetFeatures(margs):
-   from scripts import myGetFeatureBasedPos
+   from DeepMod_scripts import myGetFeatureBasedPos
 
    # get common options
    moptions, ErrorMessage = mCommonParam(margs)
