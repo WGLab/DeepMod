@@ -12,6 +12,8 @@ from argparse import RawTextHelpFormatter
 
 from DeepMod_scripts.myCom import *
 
+
+
 # three modules in DeepMod
 parser = argparse.ArgumentParser(description="Detect nucleotide modification from nanopore signals data.", epilog="For example, \n \
 \tpython %(prog)s train: Training a modification classifier.\n \
