@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 import os, sys, time
 from collections import defaultdict
