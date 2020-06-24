@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 
 setuptools.setup(
-    name="NanoMod", # Replace with your own username
+    name="DeepMod", # Replace with your own username
     version="0.1.2",
     author="Qian Liu",
     author_email="liuqianhn@gmail.com",
