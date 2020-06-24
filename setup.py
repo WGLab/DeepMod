@@ -21,8 +21,8 @@ setuptools.setup(
     packages=['DeepMod_scripts'],
     package_dir={'DeepMod_scripts': 'bin/DeepMod_scripts'},
     scripts=['bin/DeepMod.py', 'DeepMod_tools/*.py'],
-    #package_data={'': ['']},
-    data_files=[('train_deepmod', ['train_deepmod/*'])],
+    package_data={'train_deepmod': ['train_deepmod/*']},
+    #data_files=[('train_deepmod', ['train_deepmod/*'])],
     classifiers=[
         "Programming Language :: Python",
         'Intended Audience :: Science/Research',
