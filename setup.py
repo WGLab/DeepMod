@@ -21,7 +21,7 @@ setuptools.setup(
     packages=['DeepMod_scripts'],
     package_dir={'DeepMod_scripts': 'bin/DeepMod_scripts'},
     scripts=['bin/DeepMod.py', 'DeepMod_tools/cal_EcoliDetPerf.py', 'DeepMod_tools/generate_motif_pos.py', 'DeepMod_tools/hm_cluster_predict.py', 'DeepMod_tools/sum_chr_mod.py'],
-    package_data={'train_deepmod': ['train_deepmod/*']},
+    package_data={'train_deepmod': ['train_deepmod/*/*']},
     #data_files=[('train_deepmod', ['train_deepmod/*'])],
     classifiers=[
         "Programming Language :: Python",
