@@ -137,7 +137,7 @@ def mDetect(margs):
          print("No mod file is provided. The default one is used")
          moptions['modfile'] = ('train_deepmod/rnn_P90wd%d_f53/mod_train_P90wd%d_f53' % (moptions['windowsize'], moptions['windowsize']))
          if (not os.path.isfile(moptions['modfile']+'.meta')):
-            moptions['modfile'] = ('%s/train_deepmod/rnn_P90wd%d_f53/mod_train_P90wd%d_f53' % (sys.prefix, moptions['windowsize'], moptions['windowsize']))
+            moptions['modfile'] = ('{}/lib/python{}.{}/site-packages/DeepMod/train_deepmod/rnn_P90wd%d_f53/mod_train_P90wd%d_f53' % (sys.prefix,sys.version_info.major,sys.version_info.minor, moptions['windowsize'], moptions['windowsize']))
       if (not os.path.isfile(moptions['modfile']+'.meta')):
          ErrorMessage = ErrorMessage + ("\n\tThe meta file (%s) does not exist" % (moptions['modfile']+'.meta' if not moptions['modfile']==None else ""))
    else:

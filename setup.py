@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="DeepMod", # Replace with your own username
-    version="0.1.2",
+    version="0.1.3",
     author="Qian Liu",
     author_email="liuqianhn@gmail.com",
     description="A deep-learning tool to detect DNA modifications using Nanopore long-read sequencing data",
