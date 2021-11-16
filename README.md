@@ -19,7 +19,7 @@ DeepMod is based on deep learning framework, and needs to access raw data of Nan
 The developmental version of DeepMod has been tested on Linux operating system: CentOS 7.0 with both CPU and GPU machines.
 
 ### Future improvement
-Now, DeepMod supports basecalled data with either event tables or move tables. But it does not support multi-fast5. For multi-fast5 issue, one can use API at https://github.com/nanoporetech/ont_fast5_api to convert multi-fast5 to single fast5 file, and then re-basecall to get event information as input of DeepMod. We have been working on improvement of DeepMod to support multi-fast5.
+Now, DeepMod supports basecalled data with either event tables or move tables (***But not tested!!!***). But it does not support multi-fast5. For multi-fast5 issue, one can use API at https://github.com/nanoporetech/ont_fast5_api to convert multi-fast5 to single fast5 file, and then re-basecall to get event information as input of DeepMod. We have been working on improvement of DeepMod to support multi-fast5.
 
 ## Installation
 Please refer to [Installation](https://github.com/WGLab/DeepMod/blob/master/docs/Install.md) for how to install DeepMod.
