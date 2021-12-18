@@ -12,7 +12,7 @@ setuptools.setup(
     name="DeepMod", # Replace with your own username
     version="0.1.3",
     author="Qian Liu",
-    author_email="liuqianhn@gmail.com",
+    author_email="",
     description="A deep-learning tool to detect DNA modifications using Nanopore long-read sequencing data",
     long_description=long_description,
     long_description_content_type="text/markdown",
