@@ -8,6 +8,8 @@ DeepMod is a computational tool which takes long-read signals as input and outpu
 
 The input of DeepMod is Nanopore long read data together a refrence genome.
 
+Please note that the default model is trained on Metrichore basecalled data. While it has reasoanble performance on Albacore v1 basecalled data, it should not be used in Albacore v2 (they require different sets of models) or any Guppy basecalled data, due to the differences in basecalling approaches. We are testing the newly trained model on move table basecalled data at the moment. If you use DeepMod in your research, please be mindful that different basecallers can generate very different signal properties so the correct model (rather than default model) needs to be used for your specific data set.
+
 ## System Requirements
 ### Hardware requirements
 DeepMod is based on deep learning framework, and needs to access raw data of Nanopore sequencing. Thus, it needs enough RAM to support deep learning framework and enough hard drive for raw data of Nanopore sequencing. GPU can substantially speedup the detection process. For optimal performance, we recommend a computer with:
