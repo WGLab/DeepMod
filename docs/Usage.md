@@ -1,43 +1,25 @@
-**This is an explanation of how to use DeepMod without examples. If you want to run some examples, please refer to [demo](https://github.com/WGLab/DeepMod/blob/master/docs/Reproducibility.md).**
+Usage: python DeepMod.py [-h] [--bam BAM] [-chrom [CHROM [CHROM ...]]] [--ref REF] --fast5 FAST5 --output OUTPUT [--threads THREADS] [--file_name FILE_NAME]
+                  [--model MODEL] [--guppy_group GUPPY_GROUP] [--tombo_group TOMBO_GROUP] [--basecaller {guppy,tombo}] [-wgs_contigs_type WGS_CONTIGS_TYPE]
 
-
-The inputs of DeepMod is a group of FAST5 files and a reference genome. FAST5 files need to be basecalled already, and `Events` data must be availabe in FAST5 files. 
-
-DeepMod has a functional module called "detect" which will detect a specific modification in a single run. However, if the dataset and genome size is very larger or one wants to have the results soon, it would be better to run "detect" in a separate process simultaneously and then merge them together. For some special cases, if there is cluster effect between modifications (such as 5mC in CpG cluster), the third process would be used for additional prediction after "detect". How to use the three functional modules is described below.
-
-# 1. How to detect modifications from FAST5 files.
-The command for modification detection is to run `python DeepMod.py detect`. Without any other parameters, the help document will be shown. An example of how to use it is given below.
-
-```
-python DeepMod/bin/DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolder out_folder --Base C --modfile train_mod/rnn_f7_wd21_chr1to10_4/mod_train_f7_wd21_chr1to10 --FileID User_Uniq_name --threads 4
-```
-where users need to provide where is the FAST5 files (`--wrkBase`), where is the reference genome (`--Ref`), where is the output folder (`--outFolder`), and also the base of interest and the mod file. Users can optionally specify unique string for the results file names (`--FileID`) and how many threads are used (`--threads`).
-
-If you want to make the prediction for base `A`, the following command could be used.
-```
-python DeepMod/bin/DeepMod.py detect --wrkBase FAST5-Folder --Ref Ref_genome_path --outFolder out_folder --Base A --modfile train_mod/rnn_conmodA_P100wd21_f7ne1u0_4/mod_train_conmodA_P100wd21_f3ne1u0 --FileID User_Uniq_name --threads 4
-```
-
-
-# 2. How to merge different runs of modification detection
-Some projects might generate very large Nanopore sequencing data. For example, [NA12878 Nanopore sequencing data](https://github.com/nanopore-wgs-consortium/NA12878/blob/master/nanopore-human-genome/rel_3_4.md) was ~30TB. To speed up the detection of modification, users can run DeepMod with different `--FileID` and folders where fast5 files are (`--wrkBase`) but the same output folder (`--outFolder`). Then, the following script can be used to merge modification detection grouped by chromosomes for human genome.
-```
-python DeepMod/tools/sum_chr_mod.py outFolder base-of-interest res-unique-filename chromosomes
-```
-The last parameter is optional if running on human genome; otherwise, the chromosomes should be provided by a string where chromosome names are seperated by ','. `res-unique-filename` is a unique prefix of the summary file under `outFolder`. `outFolder` is the output folder of `DeepMod` and the prediction of `DeepMod` must be in the sub-folders under `outFolder`. 
-
-# 3. How to consider modification cluster effect.
-5mC in CpG motifs has cluster effect in human genome. To consider cluster effect, a second deep learning process was designed to improve the 5mC detection performance. To do that, additional commands below are used
-
-## Output C in CpG motifs in a genome
-```
-python DeepMod/tools/generate_motif_pos.py ref-genome result-folder C CG 0
-```
-The result files were generated under the directory of *result-folder*.
-
-### Generated clustered results.
-```
-python DeepMod/tools/hm_cluster_predict.py prefix-merged-bed-files genome_motif_folder-in-last-step
-```
-The output files will be under the same directory of *prefix-merged-bed-files* but with the prefix of *prefix-merged-bed-files* by appending "_clusterCpG".
-
+optional arguments:
+  -h, --help            show this help message and exit
+  --bam BAM             Path to bam file if Guppy basecaller is user. BAM file is not needed with Tombo fast5 files.
+  -chrom [CHROM [CHROM ...]], --chrom [CHROM [CHROM ...]]
+                        A space/whitespace separated list of contigs, e.g. chr3 chr6 chr22. Only applicable with guppy basecaller.
+  --ref REF             Path to reference file
+  --fast5 FAST5         Path to folder containing tombo requiggle Fast5 files. Fast5 files will be recusrviely searched
+  --output OUTPUT       Path to folder where features will be stored
+  --threads THREADS     Number of processors to use
+  --file_name FILE_NAME
+                        Name of the output file
+  --model MODEL         Name of the model. Current options are "guppy_na12878" and "tombo_na12878". Use according to the basecaller specified.
+  --guppy_group GUPPY_GROUP
+                        Name of the guppy basecall group
+  --tombo_group TOMBO_GROUP
+                        Name of the tombo group
+  --basecaller {guppy,tombo}
+                        Use Tombo or Guppy output
+  -wgs_contigs_type WGS_CONTIGS_TYPE, --wgs_contigs_type WGS_CONTIGS_TYPE
+                        Options are "with_chr", "without_chr" and "all", "with_chr" option will assume human genome and run DeepMod on chr1-22 X Y,
+                        "without_chr" will run on chromosomes 1-22 X Y if the BAM and reference genome files use chromosome names without "chr". "all" option
+                        will run DeepMod on each contig present in reference genome FASTA file. Only applicable with guppy basecaller.
