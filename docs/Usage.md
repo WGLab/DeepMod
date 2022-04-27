@@ -1,3 +1,4 @@
+```
 Usage: python DeepMod.py [-h] [--bam BAM] [-chrom [CHROM [CHROM ...]]] [--ref REF] --fast5 FAST5 --output OUTPUT [--threads THREADS] [--file_name FILE_NAME]
                   [--model MODEL] [--guppy_group GUPPY_GROUP] [--tombo_group TOMBO_GROUP] [--basecaller {guppy,tombo}] [-wgs_contigs_type WGS_CONTIGS_TYPE]
 
@@ -23,3 +24,4 @@ optional arguments:
                         Options are "with_chr", "without_chr" and "all", "with_chr" option will assume human genome and run DeepMod on chr1-22 X Y,
                         "without_chr" will run on chromosomes 1-22 X Y if the BAM and reference genome files use chromosome names without "chr". "all" option
                         will run DeepMod on each contig present in reference genome FASTA file. Only applicable with guppy basecaller.
+```
