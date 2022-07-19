@@ -45,6 +45,16 @@ conda install -c r rpy2 r-ggplot2 r-gridextra r-plyr r-rcolorbrewer
 ```
 Users might need to install `tensorflow` with version 1.13 by yourself or by using `conda install -c conda-forge tensorflow matplotlib` (if there are conflicts when using this command, uers need to give up and install `tensorflow` and `matplotlib` by yourself.).
 
+If you're having trouble setting up your conda environment (e.g. taking a long time to solve the conda environment or DeepMod doesn't work in your environment), you can manually install the required packages using the following commands (run each command line by line):
+```
+conda create -n mdeepmod python=3.6.10
+conda activate mdeepmod
+conda install -c anaconda h5py==2.7.1 hdf5==1.10.1 numpy==1.14.0 scipy==1.0.0 scikit-learn==0.19.1
+conda install -c bioconda minimap2==2.12 bwa==0.7.15 samtools==1.9
+conda install -c r r==3.6.0 rpy2==3.4.5
+conda install -c conda-forge tensorflow==1.7.0 matplotlib==3.1.0
+```
+
 ## Install DeepMod:
 	* git clone https://github.com/WGLab/DeepMod
 	* The script to be run is in bin/DeepMod.py: 
