@@ -45,6 +45,11 @@ conda install -c r rpy2 r-ggplot2 r-gridextra r-plyr r-rcolorbrewer
 ```
 Users might need to install `tensorflow` with version 1.13 by yourself or by using `conda install -c conda-forge tensorflow matplotlib` (if there are conflicts when using this command, uers need to give up and install `tensorflow` and `matplotlib` by yourself.).
 
+### Additional notes
+
+Some users reported that the compression format of their fast5 is vbz instead of gzip. Install `ont-vbz-hdf-plugin` solves the problem. Otherwise, an error message such as "Error!!! No Raw_reads/Signal data" will be shown.
+
+
 ## Install DeepMod:
 	* git clone https://github.com/WGLab/DeepMod
 	* The script to be run is in bin/DeepMod.py: 
